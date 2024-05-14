@@ -18,6 +18,8 @@ from sklearn.metrics import f1_score
 import os
 from opacus import PrivacyEngine
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 def set_seed(seed):
     # 设置 PyTorch 的随机种子
     torch.manual_seed(seed)
@@ -32,7 +34,7 @@ def set_seed(seed):
 
 set_seed(980616)
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+
 warnings.filterwarnings('ignore')
 
 # * clip_path -> action_path
@@ -75,7 +77,7 @@ def cal_loss(prediction, label):
         accuracy = (label == pred_label_id).float().sum() / label.shape[0]
     return loss, accuracy, pred_label_id, label
 
-def loss_function(prediction, label, model, weight_decay,epsilon):
+def loss_function(prediction, label, model, alpha,epsilon):
     label = label.squeeze(dim=1)
     # cross_entropy_loss = F.cross_entropy(outputs, label.squeeze())
     cross_entropy_loss = F.cross_entropy(prediction, label)
@@ -85,7 +87,9 @@ def loss_function(prediction, label, model, weight_decay,epsilon):
 
     tmp = (1-model.w)*np.exp(epsilon)+model.w
     loss_w,_ = torch.max(tmp, dim=0)
-    total_loss = (1-weight_decay)*cross_entropy_loss + weight_decay *loss_w
+    total_loss = alpha*cross_entropy_loss + loss_w
+    # print("cross_entropy_loss:", weight_cross*cross_entropy_loss)
+    # print("w_loss:", weight_w *loss_w)
     return total_loss,accuracy,pred_label_id, label
 
 def gumbel_dropout(input,w,tau=0.1,hard=True):
@@ -153,49 +157,40 @@ class ConcatModel(nn.Module):
         prediction = self.classifier(res_lap)
         return prediction
 
-def pretrain():
+def pretrain(tau, epsilon, alpha,path,learning_rate):
     batch_size = 8
     train_dataset = MultiModalDataset_ti('feature/train_EEG.csv','feature/action/train_clip_v2.pickle','feature/EEG/train_bert.pickle')
     val_dataset = MultiModalDataset_ti('feature/test_EEG.csv','feature/action/test_clip_v2.pickle','feature/EEG/test_bert.pickle')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-    tau = 0.1
-    epsilon = 0.1
-    weight_decay = 0.5
+    # tau = 0.1
+    # epsilon = 0.1
+    # weight_decay = 0.5
     model = ConcatModel(tau, epsilon)
-    # optimizer = Adam(model.parameters(), lr=learning_rate)
-    learning_rate = 1e-6
-    epochs = 50
+    # learning_rate = 1e-6
+    
+    epochs = 30
     # optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, eps=1e-8)
     optimizer = Adam(model.parameters(), lr=learning_rate)
     # optimizer = optim.SGD(model.parameters(), lr=learning_rate)
     
-    path = 'model_dict/PriGumbel/pretrain/'
-
+    # path = 'model_dict/PriGumbel/pretrain/'
     os.makedirs(path, exist_ok=True)
-    
-    # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
-    # record_path = 'model_dict/ConcatModel/record.txt'
-    # load_model_path = 'model_dict/ConcatModel/best_f1.pickle'
     whole_record_path = path+'whole_record.txt'
     best_record_path = path+'best_record.txt'
     save_model_path = path+'best_f1.pickle'
-    # model.load_state_dict(torch.load(load_model_path), strict=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    #! 在cpu上能跑
-    # device = torch.device("cpu")
-    # model = model.to(device)
+    model = model.to(device)  
 
-    # model = SingleStream().to(device)
-    model = model.to(device)  # 不并行试试
-    # model = torch.nn.parallel.DataParallel(model.to(device))
-
-    total_acc_val = 0
-    total_loss_val = 0
+    train_acc_list =  []
+    val_acc_list = []
+    w_list = []
     f1_score_best = 0.5
-
+    privacy_budget_max_list = []
+    privacy_budget_avg_list = []
+    drop_out_rate_max_list = []
+    drop_out_rate_avg_list = []
     # training
     for epoch in range(epochs):
         epoch_acc_train = 0
@@ -212,7 +207,7 @@ def pretrain():
             frame_input, vedio_mask,title_input, text_mask, label = frame_input.to(device), vedio_mask.to(device),title_input.to(device), text_mask.to(device), label.to(device)
             prediction = model(frame_input, vedio_mask,title_input, text_mask)
             # loss, accuracy, _, _ = cal_loss(prediction,label)  
-            loss, accuracy, pred_label_id, label_id = loss_function(prediction, label, model, weight_decay,epsilon)
+            loss, accuracy, pred_label_id, label_id = loss_function(prediction, label, model, alpha,epsilon)
             epoch_loss_train += loss.item()
             epoch_acc_train += accuracy.item()
             # loss.backward()
@@ -223,12 +218,20 @@ def pretrain():
         label_all = []
         # model.eval()
         model.eval()
+        # print(model.w)
+        tmp = (1-model.w)*np.exp(epsilon)+model.w
+        privacy_budget_max,_ = torch.max(tmp, dim=0)
+        privacy_budget_avg = torch.mean(tmp)
+        drop_out_rate_max = model.w.max()
+        drop_out_rate_avg = torch.mean(model.w)
+        # print("drop out rate:",model.w.max())
+        w_list.append(model.w)
         with torch.no_grad():
             for frame_input, vedio_mask,title_input, text_mask, label in tqdm(val_dataloader):
                 sample_size_val +=1
                 frame_input, vedio_mask,title_input, text_mask, label = frame_input.to(device), vedio_mask.to(device),title_input.to(device), text_mask.to(device), label.to(device)
                 prediction = model(frame_input, vedio_mask,title_input, text_mask)
-                loss, accuracy, pred_label_id, label_id = loss_function(prediction, label, model, weight_decay,epsilon)
+                loss, accuracy, pred_label_id, label_id = loss_function(prediction, label, model, alpha,epsilon)
                 # loss, accuracy, pred_label_id, label_id = cal_loss(prediction,label)  # 3.26修改加f_1 score
                 # loss, accuracy, _, _ = cal_loss(prediction, label)
                 prediction_all.extend(pred_label_id.cpu().numpy())
@@ -237,13 +240,25 @@ def pretrain():
                 epoch_acc_val += accuracy.item()
 
         f1_score_epoch = f1_score(prediction_all,label_all)
+        train_acc_list.append(epoch_acc_train/sample_size_train)
+        val_acc_list.append(epoch_acc_val/sample_size_val)
+        privacy_budget_max_list.append(privacy_budget_max)
+        privacy_budget_avg_list.append(privacy_budget_avg)
+        drop_out_rate_max_list.append(drop_out_rate_max)
+        drop_out_rate_avg_list.append(drop_out_rate_avg)
+
 
         record = f'''Epochs: {epoch + 1}
         | Train Loss: {epoch_loss_train/sample_size_train: .3f}
         | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
         | Val Loss: {epoch_loss_val/sample_size_val: .3f}
         | Val Accuracy: {epoch_acc_val/sample_size_val: .3f}
-        | f_1 Score: {f1_score_epoch: .3f}\n'''
+        | f_1 Score: {f1_score_epoch: .3f}
+        | privacy_budget_max: {privacy_budget_max: .3f}
+        | privacy_budget_avg: {privacy_budget_avg: .3f}
+        | drop_out_rate_max: {drop_out_rate_max: .3f}
+        | drop_out_rate_avg: {drop_out_rate_avg: .3f}
+        | alpha: {alpha:.3f}\n'''
         print(record)
         with open(whole_record_path, "a") as file:
             file.write(record)
@@ -257,17 +272,11 @@ def pretrain():
             f1_score_best = f1_score_epoch
             with open(best_record_path, "w") as file:
                 file.write(f1_best_record)
+    with open(path+'result.pkl', 'wb') as f:   # 写入
+        pickle.dump((train_acc_list,val_acc_list,w_list,privacy_budget_max_list,privacy_budget_avg_list,drop_out_rate_max_list,
+                     drop_out_rate_avg_list), f)
 
 def main():
-    # settings
-    # batch_size = 8
-    # model = SingleStream()
-    # epochs = 20
-    # train_dataset = SingleStreamDataset('feature/train_EEG.csv')
-    # val_dataset = SingleStreamDataset('feature/test_EEG.csv')
-    # os.makedirs('model_dict/ConcatModel', exist_ok=True)
-    # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
-    # record_path = 'model_dict/ConcatModel/record.txt'
     batch_size = 8
     train_dataset = MultiModalDataset_ti('feature/train_EEG.csv','feature/action/train_clip_v2.pickle','feature/EEG/train_bert.pickle')
     val_dataset = MultiModalDataset_ti('feature/test_EEG.csv','feature/action/test_clip_v2.pickle','feature/EEG/test_bert.pickle')
@@ -512,9 +521,31 @@ def test():
 
 
 if __name__ == '__main__':
-    pretrain()
+    tau = 0.01
+    epsilon = 1
+    start = np.log(10 ** -2)
+    end = 2
+    num_values = 50
+    learning_rate = 1e-5
+    values = np.linspace(start, end, num_values)
+    alpha = np.exp(values)
+    for alpha_test in alpha:
+        print(alpha_test)
+
+    # weight_decay = 0.5   #0.8, 0.2
+    # weight_cross = 0.4
+    # weight_w = 0.6
+    ############## 按比例调
+    # weight_frac = weight_cross/weight_w
+    # weight_frac = 0.5
+    
+        path = 'model_dict/PriGumbel/new_alpha/' + "{:.2f}_{:.1f}_{:.4f}_{:.0e}/".format(tau, epsilon, alpha_test,learning_rate)
+        pretrain(tau, epsilon, alpha_test,path,learning_rate)
     # main()
     # main2()
     # test()
     
+        '''
+    Good results: 0.01_1_0.2_1e-5
+    '''
 
