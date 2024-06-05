@@ -32,7 +32,7 @@ def set_seed(seed):
 
 set_seed(980616)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 warnings.filterwarnings('ignore')
 
 # * clip_path -> action_path
@@ -83,15 +83,19 @@ class ConcatModel(nn.Module):
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
+        hidden_dropout_prob = 0.1
+        self.dropout = nn.Dropout(hidden_dropout_prob)
         # self.fc1 = nn.Linear(3*768, 3*768)
         # self.fc2 = nn.Linear(3*768, 768)
-        self.fc_layers = nn.Sequential(
-            nn.Linear(3*768, 3*768),
-            nn.ReLU(),
-            nn.Linear(3*768, 768),
-            nn.Tanh(),
-        )
-        self.classifier = nn.Linear(768, 2)
+        # self.fc_layers = nn.Sequential(
+        #     nn.Linear(3*768, 3*768),
+        #     nn.ReLU(),
+        #     nn.Linear(3*768, 768),
+        #     nn.Tanh(),
+        # )
+        # self.classifier = nn.Linear(768, 2)
+
+        self.classifier = nn.Linear(768*3, 2) # without fc_layers
         self.dp_mode = dp_mode
 
     def forward(self, frame_input, vedio_mask,title_input, text_mask):
@@ -105,7 +109,7 @@ class ConcatModel(nn.Module):
         img_feature = vision_embedding.squeeze(1)
         feature_concat = torch.cat((bert_feature, img_feature,cross_attn_result_text),dim=1)  # new add
         if self.dp_mode == 'feature_all_lap':
-            pooled_output = feature_concat
+            pooled_output  = self.dropout(feature_concat)
             pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
             pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
             pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
@@ -115,10 +119,11 @@ class ConcatModel(nn.Module):
             noise = m.sample([pooled_output.shape[0]]).to(device)
             pooled_output += noise.view(-1, 1)
             feature_concat = pooled_output
-        # feature_dnn = self.fc2(torch.relu(self.fc1(feature_concat)))
-        feature_dnn = self.fc_layers(feature_concat)
-        prediction = self.classifier(feature_dnn)
-        # prediction = self.fc_layers(feature_concat)
+
+        # feature_dnn = self.fc_layers(feature_concat)
+        # prediction = self.classifier(feature_dnn)
+
+        prediction = self.classifier(feature_concat)
         return prediction
 
 def pretrain():
@@ -264,14 +269,14 @@ def main():
         max_grad_norm=MAX_GRAD_NORM,
     )
     
-    os.makedirs('model_dict/seedPriConcat/fineturn', exist_ok=True)
+    os.makedirs('model_dict/PriConcat/fineturn', exist_ok=True)
     
     # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
     # record_path = 'model_dict/ConcatModel/record.txt'
-    load_model_path = 'model_dict/seedPriConcat/pretrain/best_f1.pickle'
-    whole_record_path = 'model_dict/seedPriConcat/fineturn/whole_record.txt'
-    best_record_path = 'model_dict/seedPriConcat/fineturn/best_record.txt'
-    save_model_path = 'model_dict/seedPriConcat/fineturn/best_f1.pickle'
+    load_model_path = 'model_dict/PriConcat/pretrain/best_f1.pickle'
+    whole_record_path = 'model_dict/PriConcat/fineturn/whole_record.txt'
+    best_record_path = 'model_dict/PriConcat/fineturn/best_record.txt'
+    save_model_path = 'model_dict/PriConcat/fineturn/best_f1.pickle'
     model.load_state_dict(torch.load(load_model_path), strict=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -377,15 +382,16 @@ def main2():
 
 
     
-    os.makedirs('model_dict/seedPriConcat/fineturn2', exist_ok=True)
+    os.makedirs('model_dict/seedPriConcat/fineturn3', exist_ok=True)
     
     # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
     # record_path = 'model_dict/ConcatModel/record.txt'
     load_model_path = 'model_dict/PriConcat/pretrain/best_f1.pickle'
-    whole_record_path = 'model_dict/seedPriConcat/fineturn2/whole_record.txt'
-    best_record_path = 'model_dict/seedPriConcat/fineturn2/best_record.txt'
-    save_model_path = 'model_dict/seedPriConcat/fineturn2/best_f1.pickle'
-    model.load_state_dict(torch.load(load_model_path), strict=False)
+    whole_record_path = 'model_dict/seedPriConcat/fineturn3/whole_record.txt'
+    best_record_path = 'model_dict/seedPriConcat/fineturn3/best_record.txt'
+    save_model_path = 'model_dict/seedPriConcat/fineturn3/best_f1.pickle'
+    
+    # model.load_state_dict(torch.load(load_model_path), strict=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -457,10 +463,15 @@ def main2():
             with open(best_record_path, "w") as file:
                 file.write(f1_best_record)
 def test():
-    model = ConcatModel()
+    model = ConcatModel(dp_mode='non-pri')
     # print(model.bert.encoder.layer[-1])
-    print(model.fc_layers)
-    print(model.classifier)
+    load_model_path = 'model_dict/PriConcat/pretrain/best_f1.pickle'
+    model.load_state_dict(torch.load(load_model_path), strict=False)
+    weights = model.state_dict()
+    for name, weight in weights.items():
+        print(name, weight)
+
+
 
     # for name, module in model.named_children():
     #     print(name)
@@ -470,5 +481,6 @@ if __name__ == '__main__':
     # pretrain()
     # main()
     main2()
+    # test()
     
 
