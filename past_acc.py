@@ -32,7 +32,7 @@ def set_seed(seed):
 
 set_seed(980616)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3,2,0,1"
 warnings.filterwarnings('ignore')
 
 # * clip_path -> action_path
@@ -76,15 +76,13 @@ def cal_loss(prediction, label):
         return loss, accuracy, pred_label_id, label
 
 class ConcatModel(nn.Module):
-    def __init__(self,dp_mode):
+    def __init__(self):
         super().__init__()
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.visual_encoder = nn.Linear(512, 768)
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
-        # self.fc1 = nn.Linear(3*768, 3*768)
-        # self.fc2 = nn.Linear(3*768, 768)
         self.fc_layers = nn.Sequential(
             nn.Linear(3*768, 3*768),
             nn.ReLU(),
@@ -92,33 +90,35 @@ class ConcatModel(nn.Module):
             nn.Tanh(),
         )
         self.classifier = nn.Linear(768, 2)
-        self.dp_mode = dp_mode
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
+        self.eps = torch.tensor(3.0) # pre:1.0,0.1
 
-    def forward(self, frame_input, vedio_mask,title_input, text_mask):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def forward(self, frame_input, vedio_mask, title_input, text_mask,hard):
         vision_embedding = self.visual_encoder(frame_input)
-        bert_semantics_embedding, bert_feature = self.bert(input_ids= title_input, attention_mask=text_mask,return_dict=False) #768
-        cross_attn_result_text = self.multi_head_decoder(tgt=vision_embedding.permute(1,0,2), memory=bert_semantics_embedding.permute(1,0,2),
-                                                   tgt_key_padding_mask=vedio_mask==0, memory_key_padding_mask=text_mask==0)
-        cross_attn_result_text = cross_attn_result_text.permute(1,0,2).mean(dim=1) #768
+        bert_semantics_embedding, bert_feature = self.bert(input_ids= title_input, 
+                                                           attention_mask=text_mask,
+                                                           return_dict=False) #768
+        cross_attn_result_text = self.multi_head_decoder(tgt=vision_embedding.permute(1,0,2), 
+                                                         memory=bert_semantics_embedding.permute(1,0,2),
+                                                         tgt_key_padding_mask=vedio_mask == 0, 
+                                                         memory_key_padding_mask=text_mask == 0)
+        cross_attn_result_text = cross_attn_result_text.permute(1, 0, 2).mean(dim=1) #768
         
         img_feature = vision_embedding.squeeze(1)
-        feature_concat = torch.cat((bert_feature, img_feature,cross_attn_result_text),dim=1)  # new add
-        if self.dp_mode == 'feature_all_lap':
-            pooled_output = feature_concat
-            pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
-            EPSILON = 0.1 ## 暂时设一个  7.5 ACC 99%
-            lap_sigma=1/EPSILON
-            m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
-            noise = m.sample([pooled_output.shape[0]]).to(device)
-            pooled_output += noise.view(-1, 1)
-            feature_concat = pooled_output
-        # feature_dnn = self.fc2(torch.relu(self.fc1(feature_concat)))
-        feature_dnn = self.fc_layers(feature_concat)
-        prediction = self.classifier(feature_dnn)
-        # prediction = self.fc_layers(feature_concat)
+        feature_concat = torch.cat((bert_feature, img_feature, cross_attn_result_text), dim=1)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).cuda()
+        eps_hat = ((self.eps.exp() - w) / (1 - w)).log()
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
         return prediction
 
 
@@ -126,41 +126,30 @@ def main2():
     '''
     Adding noise with Lap to all features
     '''
-    # settings
-    # batch_size = 8
-    # model = SingleStream()
-    # epochs = 20
-    # train_dataset = SingleStreamDataset('feature/train_EEG.csv')
-    # val_dataset = SingleStreamDataset('feature/test_EEG.csv')
-    # os.makedirs('model_dict/ConcatModel', exist_ok=True)
-    # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
-    # record_path = 'model_dict/ConcatModel/record.txt'
     batch_size = 8
     train_dataset = MultiModalDataset_ti('feature/train_EEG.csv','feature/action/train_clip_v2.pickle','feature/EEG/train_bert.pickle')
     val_dataset = MultiModalDataset_ti('feature/test_EEG.csv','feature/action/test_clip_v2.pickle','feature/EEG/test_bert.pickle')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-    model = ConcatModel(dp_mode = 'feature_all_lap')
+    model = ConcatModel()
 
-    # optimizer = Adam(model.parameters(), lr=learning_rate)
+    DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
+    model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
     learning_rate = 1e-6
+    model_optimizer = Adam(model_params, lr=learning_rate)
+    DP_optimizer = Adam(DP_params, lr=learning_rate)
+    
     epochs = 50
     # optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, eps=1e-8)
-    optimizer = Adam(model.parameters(), lr=learning_rate)
-    EPSILON = 7.5
-    DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
+    # optimizer = Adam(model.parameters(), lr=learning_rate)
 
-
+    suffix = 'new_3.0eps/'
+    os.makedirs('model_dict/'+ suffix, exist_ok=True)
     
-    os.makedirs('model_dict/retry/seedPriConcat/fineturn2', exist_ok=True)
-    
-    # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
-    # record_path = 'model_dict/ConcatModel/record.txt'
-    load_model_path = 'model_dict/retry/PriConcat/pretrain/best_f1.pickle'
-    whole_record_path = 'model_dict/retry/seedPriConcat/fineturn2/whole_record.txt'
-    best_record_path = 'model_dict/retry/seedPriConcat/fineturn2/best_record.txt'
-    save_model_path = 'model_dict/retry/seedPriConcat/fineturn2/best_f1.pickle'
+    whole_record_path = 'model_dict/' + suffix + 'whole_record.txt'
+    best_record_path = 'model_dict/' + suffix + 'best_record.txt'
+    save_model_path = 'model_dict/' + suffix + 'best_f1.pickle'
     # model.load_state_dict(torch.load(load_model_path), strict=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -186,14 +175,22 @@ def main2():
         for frame_input, vedio_mask,title_input, text_mask, label in tqdm(train_dataloader):
             sample_size_train+=1
             model.train()
-            optimizer.zero_grad()
+            # train DP params
+            DP_optimizer.zero_grad()
             frame_input, vedio_mask,title_input, text_mask, label = frame_input.to(device), vedio_mask.to(device),title_input.to(device), text_mask.to(device), label.to(device)
-            prediction = model(frame_input, vedio_mask,title_input, text_mask)
+            prediction = model(frame_input, vedio_mask,title_input, text_mask,hard = False)
+            loss, accuracy, _, _ = cal_loss(prediction,label)  
+            loss.backward()
+            DP_optimizer.step()
+
+
+            model_optimizer.zero_grad()
+            prediction = model(frame_input, vedio_mask,title_input, text_mask,hard=True)
             loss, accuracy, _, _ = cal_loss(prediction,label)  
             epoch_loss_train += loss.item()
             epoch_acc_train += accuracy.item()
             loss.backward()
-            optimizer.step()
+            model_optimizer.step()
 
         prediction_all = []
         label_all = []
@@ -203,7 +200,7 @@ def main2():
             for frame_input, vedio_mask,title_input, text_mask, label in tqdm(val_dataloader):
                 sample_size_val +=1
                 frame_input, vedio_mask,title_input, text_mask, label = frame_input.to(device), vedio_mask.to(device),title_input.to(device), text_mask.to(device), label.to(device)
-                prediction = model(frame_input, vedio_mask,title_input, text_mask)
+                prediction = model(frame_input, vedio_mask,title_input, text_mask,hard=True)
                 loss, accuracy, pred_label_id, label_id = cal_loss(prediction,label)  # 3.26修改加f_1 score
                 # loss, accuracy, _, _ = cal_loss(prediction, label)
                 prediction_all.extend(pred_label_id.cpu().numpy())
