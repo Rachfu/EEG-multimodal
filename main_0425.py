@@ -225,15 +225,6 @@ def pretrain():
                 file.write(f1_best_record)
 
 def main():
-    # settings
-    # batch_size = 8
-    # model = SingleStream()
-    # epochs = 20
-    # train_dataset = SingleStreamDataset('feature/train_EEG.csv')
-    # val_dataset = SingleStreamDataset('feature/test_EEG.csv')
-    # os.makedirs('model_dict/ConcatModel', exist_ok=True)
-    # save_model_path = 'model_dict/ConcatModel/best_f1.pickle'
-    # record_path = 'model_dict/ConcatModel/record.txt'
     batch_size = 8
     train_dataset = MultiModalDataset_ti('feature/train_EEG.csv','feature/action/train_clip_v2.pickle','feature/EEG/train_bert.pickle')
     val_dataset = MultiModalDataset_ti('feature/test_EEG.csv','feature/action/test_clip_v2.pickle','feature/EEG/test_bert.pickle')

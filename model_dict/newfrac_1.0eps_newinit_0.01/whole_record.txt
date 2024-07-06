@@ -1,0 +1,300 @@
+Epochs: 1
+        | Train Loss:  0.738
+        | Train Accuracy:  0.535
+        | Val Loss:  0.662
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.772
+Epochs: 2
+        | Train Loss:  0.690
+        | Train Accuracy:  0.605
+        | Val Loss:  0.663
+        | Val Accuracy:  0.622
+        | f_1 Score:  0.760
+Epochs: 3
+        | Train Loss:  0.699
+        | Train Accuracy:  0.611
+        | Val Loss:  0.659
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.775
+Epochs: 4
+        | Train Loss:  0.694
+        | Train Accuracy:  0.610
+        | Val Loss:  0.688
+        | Val Accuracy:  0.610
+        | f_1 Score:  0.749
+Epochs: 5
+        | Train Loss:  0.694
+        | Train Accuracy:  0.622
+        | Val Loss:  0.670
+        | Val Accuracy:  0.627
+        | f_1 Score:  0.763
+Epochs: 6
+        | Train Loss:  0.698
+        | Train Accuracy:  0.610
+        | Val Loss:  0.687
+        | Val Accuracy:  0.630
+        | f_1 Score:  0.772
+Epochs: 7
+        | Train Loss:  0.695
+        | Train Accuracy:  0.602
+        | Val Loss:  0.642
+        | Val Accuracy:  0.666
+        | f_1 Score:  0.785
+Epochs: 8
+        | Train Loss:  0.681
+        | Train Accuracy:  0.628
+        | Val Loss:  0.673
+        | Val Accuracy:  0.635
+        | f_1 Score:  0.760
+Epochs: 9
+        | Train Loss:  0.675
+        | Train Accuracy:  0.617
+        | Val Loss:  0.667
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.778
+Epochs: 10
+        | Train Loss:  0.686
+        | Train Accuracy:  0.623
+        | Val Loss:  0.656
+        | Val Accuracy:  0.653
+        | f_1 Score:  0.784
+Epochs: 11
+        | Train Loss:  0.680
+        | Train Accuracy:  0.622
+        | Val Loss:  0.674
+        | Val Accuracy:  0.633
+        | f_1 Score:  0.766
+Epochs: 12
+        | Train Loss:  0.672
+        | Train Accuracy:  0.631
+        | Val Loss:  0.680
+        | Val Accuracy:  0.638
+        | f_1 Score:  0.774
+Epochs: 13
+        | Train Loss:  0.663
+        | Train Accuracy:  0.638
+        | Val Loss:  0.638
+        | Val Accuracy:  0.648
+        | f_1 Score:  0.772
+Epochs: 14
+        | Train Loss:  0.665
+        | Train Accuracy:  0.632
+        | Val Loss:  0.644
+        | Val Accuracy:  0.643
+        | f_1 Score:  0.764
+Epochs: 15
+        | Train Loss:  0.669
+        | Train Accuracy:  0.620
+        | Val Loss:  0.653
+        | Val Accuracy:  0.640
+        | f_1 Score:  0.764
+Epochs: 16
+        | Train Loss:  0.666
+        | Train Accuracy:  0.636
+        | Val Loss:  0.658
+        | Val Accuracy:  0.641
+        | f_1 Score:  0.774
+Epochs: 17
+        | Train Loss:  0.656
+        | Train Accuracy:  0.635
+        | Val Loss:  0.643
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.774
+Epochs: 18
+        | Train Loss:  0.672
+        | Train Accuracy:  0.638
+        | Val Loss:  0.638
+        | Val Accuracy:  0.669
+        | f_1 Score:  0.785
+Epochs: 19
+        | Train Loss:  0.663
+        | Train Accuracy:  0.646
+        | Val Loss:  0.655
+        | Val Accuracy:  0.635
+        | f_1 Score:  0.758
+Epochs: 20
+        | Train Loss:  0.665
+        | Train Accuracy:  0.639
+        | Val Loss:  0.647
+        | Val Accuracy:  0.679
+        | f_1 Score:  0.804
+Epochs: 21
+        | Train Loss:  0.660
+        | Train Accuracy:  0.639
+        | Val Loss:  0.649
+        | Val Accuracy:  0.653
+        | f_1 Score:  0.774
+Epochs: 22
+        | Train Loss:  0.664
+        | Train Accuracy:  0.623
+        | Val Loss:  0.644
+        | Val Accuracy:  0.676
+        | f_1 Score:  0.790
+Epochs: 23
+        | Train Loss:  0.662
+        | Train Accuracy:  0.648
+        | Val Loss:  0.655
+        | Val Accuracy:  0.651
+        | f_1 Score:  0.781
+Epochs: 24
+        | Train Loss:  0.668
+        | Train Accuracy:  0.634
+        | Val Loss:  0.639
+        | Val Accuracy:  0.651
+        | f_1 Score:  0.781
+Epochs: 25
+        | Train Loss:  0.661
+        | Train Accuracy:  0.634
+        | Val Loss:  0.655
+        | Val Accuracy:  0.653
+        | f_1 Score:  0.783
+Epochs: 26
+        | Train Loss:  0.662
+        | Train Accuracy:  0.645
+        | Val Loss:  0.647
+        | Val Accuracy:  0.650
+        | f_1 Score:  0.775
+Epochs: 27
+        | Train Loss:  0.666
+        | Train Accuracy:  0.635
+        | Val Loss:  0.645
+        | Val Accuracy:  0.648
+        | f_1 Score:  0.780
+Epochs: 28
+        | Train Loss:  0.669
+        | Train Accuracy:  0.621
+        | Val Loss:  0.634
+        | Val Accuracy:  0.651
+        | f_1 Score:  0.771
+Epochs: 29
+        | Train Loss:  0.650
+        | Train Accuracy:  0.647
+        | Val Loss:  0.633
+        | Val Accuracy:  0.668
+        | f_1 Score:  0.786
+Epochs: 30
+        | Train Loss:  0.671
+        | Train Accuracy:  0.626
+        | Val Loss:  0.642
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.782
+Epochs: 31
+        | Train Loss:  0.653
+        | Train Accuracy:  0.638
+        | Val Loss:  0.666
+        | Val Accuracy:  0.641
+        | f_1 Score:  0.767
+Epochs: 32
+        | Train Loss:  0.662
+        | Train Accuracy:  0.635
+        | Val Loss:  0.625
+        | Val Accuracy:  0.681
+        | f_1 Score:  0.795
+Epochs: 33
+        | Train Loss:  0.660
+        | Train Accuracy:  0.629
+        | Val Loss:  0.621
+        | Val Accuracy:  0.650
+        | f_1 Score:  0.781
+Epochs: 34
+        | Train Loss:  0.660
+        | Train Accuracy:  0.636
+        | Val Loss:  0.658
+        | Val Accuracy:  0.613
+        | f_1 Score:  0.754
+Epochs: 35
+        | Train Loss:  0.659
+        | Train Accuracy:  0.643
+        | Val Loss:  0.618
+        | Val Accuracy:  0.664
+        | f_1 Score:  0.783
+Epochs: 36
+        | Train Loss:  0.652
+        | Train Accuracy:  0.643
+        | Val Loss:  0.660
+        | Val Accuracy:  0.637
+        | f_1 Score:  0.769
+Epochs: 37
+        | Train Loss:  0.645
+        | Train Accuracy:  0.642
+        | Val Loss:  0.645
+        | Val Accuracy:  0.651
+        | f_1 Score:  0.773
+Epochs: 38
+        | Train Loss:  0.660
+        | Train Accuracy:  0.626
+        | Val Loss:  0.677
+        | Val Accuracy:  0.618
+        | f_1 Score:  0.757
+Epochs: 39
+        | Train Loss:  0.659
+        | Train Accuracy:  0.626
+        | Val Loss:  0.649
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.781
+Epochs: 40
+        | Train Loss:  0.656
+        | Train Accuracy:  0.635
+        | Val Loss:  0.637
+        | Val Accuracy:  0.661
+        | f_1 Score:  0.790
+Epochs: 41
+        | Train Loss:  0.648
+        | Train Accuracy:  0.651
+        | Val Loss:  0.647
+        | Val Accuracy:  0.658
+        | f_1 Score:  0.788
+Epochs: 42
+        | Train Loss:  0.646
+        | Train Accuracy:  0.643
+        | Val Loss:  0.645
+        | Val Accuracy:  0.656
+        | f_1 Score:  0.782
+Epochs: 43
+        | Train Loss:  0.661
+        | Train Accuracy:  0.645
+        | Val Loss:  0.634
+        | Val Accuracy:  0.660
+        | f_1 Score:  0.780
+Epochs: 44
+        | Train Loss:  0.646
+        | Train Accuracy:  0.642
+        | Val Loss:  0.638
+        | Val Accuracy:  0.666
+        | f_1 Score:  0.781
+Epochs: 45
+        | Train Loss:  0.657
+        | Train Accuracy:  0.624
+        | Val Loss:  0.628
+        | Val Accuracy:  0.656
+        | f_1 Score:  0.787
+Epochs: 46
+        | Train Loss:  0.651
+        | Train Accuracy:  0.652
+        | Val Loss:  0.625
+        | Val Accuracy:  0.666
+        | f_1 Score:  0.786
+Epochs: 47
+        | Train Loss:  0.647
+        | Train Accuracy:  0.642
+        | Val Loss:  0.635
+        | Val Accuracy:  0.653
+        | f_1 Score:  0.778
+Epochs: 48
+        | Train Loss:  0.660
+        | Train Accuracy:  0.644
+        | Val Loss:  0.641
+        | Val Accuracy:  0.651
+        | f_1 Score:  0.784
+Epochs: 49
+        | Train Loss:  0.654
+        | Train Accuracy:  0.646
+        | Val Loss:  0.661
+        | Val Accuracy:  0.640
+        | f_1 Score:  0.775
+Epochs: 50
+        | Train Loss:  0.643
+        | Train Accuracy:  0.651
+        | Val Loss:  0.664
+        | Val Accuracy:  0.632
+        | f_1 Score:  0.766

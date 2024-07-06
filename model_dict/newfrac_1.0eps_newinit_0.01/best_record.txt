@@ -1,0 +1,6 @@
+Epochs: 20
+        | Train Loss:  0.665
+        | Train Accuracy:  0.639
+        | Val Loss:  0.647
+        | Val Accuracy:  0.679
+        | f_1 Score:  0.804

@@ -10,6 +10,7 @@ import numpy as np
 from data import get_data
 from model import get_model
 from collections import defaultdict
+from torch.optim import Adam
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -70,8 +71,10 @@ if __name__ == '__main__':
     DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
     model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
 
-    DP_optimizer = optim.SGD(DP_params, lr=0.01)
-    model_optimizer = optim.SGD(model_params, lr=0.001)
+    # DP_optimizer = optim.SGD(DP_params, lr=0.005)
+    # model_optimizer = optim.SGD(model_params, lr=0.005)
+    # DP_optimizer = Adam(DP_params, lr=0.005)
+    model_optimizer = Adam(model_params, lr=1e-6)
     results = defaultdict(list)
     metrics = {i: torchmetrics.__dict__[i](task="multiclass", num_classes=cfg.n_class).cuda()
                for i in cfg.metrics.split(',')}
@@ -89,17 +92,17 @@ if __name__ == '__main__':
 
         # Training phase
         for i, (inputs, labels) in enumerate(train_loader):
-            if i >= 5: break
+            # if i >= 5: break
             if isinstance(inputs, list): inputs = list(i.cuda() for i in inputs)
             else: inputs = inputs.cuda()
             labels = labels.view(-1).cuda()
 
-            # train DP params
-            DP_optimizer.zero_grad()
-            for _ in range(cfg.n_dp):
-                loss = criterion(model(inputs, hard=False), labels)
-                loss.sum().backward()
-            DP_optimizer.step()
+            # # train DP params
+            # DP_optimizer.zero_grad()
+            # for _ in range(cfg.n_dp):
+            #     loss = criterion(model(inputs, hard=False), labels)
+            #     loss.sum().backward()
+            # DP_optimizer.step()
 
             # train model params
             model_optimizer.zero_grad()
@@ -138,7 +141,7 @@ if __name__ == '__main__':
                 if (acc := results['Accuracy'][-1].mean()) > best_acc:
                     best_acc = acc
                     torch.save(model.state_dict(), os.path.join(base_path, 'model.pth'))
-        torch.save({k: torch.stack(v) for k, v in results.items() if k not in ('labels', 'inputs')}, 
+        torch.save({k: torch.cat(v) for k, v in results.items() if k not in ('labels', 'inputs')}, 
                    os.path.join(base_path, 'results.pth'))
         
         res = torch.load(os.path.join(base_path, 'results.pth'))

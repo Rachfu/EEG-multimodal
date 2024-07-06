@@ -21,9 +21,15 @@ class ConcatModel(nn.Module):
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
         hidden_dropout_prob = 0.1
         self.dropout = nn.Dropout(hidden_dropout_prob)
-        self.classifier = nn.Linear(768 * 3, 2) # without fc_layers
+        self.classifier = nn.Linear(768, 2) # with fc_layers
         self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
         self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
 
     def feature(self, x):
         frame_input, vedio_mask, title_input, text_mask = x
@@ -45,13 +51,14 @@ class ConcatModel(nn.Module):
         return feature_output
 
     def forward(self, x, hard=True):
-        w = F.sigmoid(self.DP)
+        # w = F.sigmoid(self.DP)
         feature = self.feature(x)
-        noise = self.noiser.sample(feature.shape).view(*feature.shape).cuda()
-        eps_hat = ((self.eps.exp() - w) / (1 - w)).log()
-        feature = feature + noise * eps_hat
-        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
-                                hard=hard, dim=0)
-        feature = (feature * mask).sum(0)
+        # noise = self.noiser.sample(feature.shape).view(*feature.shape).cuda()
+        # eps_hat = ((self.eps.exp() - w) / (1 - w)).log()
+        # feature = feature + noise * eps_hat
+        # mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+        #                         hard=hard, dim=0)
+        # feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
         prediction = self.classifier(feature)
         return prediction

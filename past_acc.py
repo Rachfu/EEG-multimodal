@@ -32,7 +32,8 @@ def set_seed(seed):
 
 set_seed(980616)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3,2,0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+device = torch.device('cuda', 1)
 warnings.filterwarnings('ignore')
 
 # * clip_path -> action_path
@@ -90,9 +91,20 @@ class ConcatModel(nn.Module):
             nn.Tanh(),
         )
         self.classifier = nn.Linear(768, 2)
-        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        # self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        # self.DP = nn.Parameter(torch.cat((torch.full((1, 768), 0.4), torch.full((1, 768), 0.5), torch.full((1, 768), 0.3)), dim=1)) # not bad init; 反的results in newfrac_1.0eps_tt; 这个结果在 newfrac_1.0eps_newinit
+        
+        with open('feawei.pkl', 'rb') as f:
+            weight = pickle.load(f)
+        mean_values = np.mean(weight, axis=0)
+        mean_values = (mean_values-np.mean(mean_values))/np.std(mean_values)
+        w_init = 1-F.sigmoid(torch.tensor(1 * (mean_values), dtype=torch.float32))
+        # w_init = F.sigmoid(torch.tensor(1 * (1-mean_values), dtype=torch.float32))
+        # self.DP = nn.Parameter(w_init.unsqueeze(0))
+        self.DP = nn.Parameter(torch.cat((torch.full((1, 768), 0.4), torch.full((1, 768), 0.5), torch.full((1, 768), 0.3)), dim=1) + w_init.unsqueeze(0)-0.5)  # 结果在newfrac_1.0eps_newinit_1
+
         self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
-        self.eps = torch.tensor(3.0) # pre:1.0,0.1
+        self.eps = torch.tensor(1.0) # pre:1.0,0.1
 
     def forward(self, frame_input, vedio_mask, title_input, text_mask,hard):
         vision_embedding = self.visual_encoder(frame_input)
@@ -110,9 +122,15 @@ class ConcatModel(nn.Module):
         feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
         feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
         feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        # test = feature.detach().cpu().numpy()
+        # print(test.shape)
+        # reshaped_data = test.reshape(8,3, 768)
+        # mean_values = np.mean(reshaped_data, axis=2)
+        # print(mean_values)
+
         w = F.sigmoid(self.DP)
-        noise = self.noiser.sample(feature.shape).view(*feature.shape).cuda()
-        eps_hat = ((self.eps.exp() - w) / (1 - w)).log()
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((self.eps.exp() - w) / (1 - w)).log())  # fix
         feature = feature + noise * eps_hat
         mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
                                 hard=hard, dim=0)
@@ -137,6 +155,7 @@ def main2():
     DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
     model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
     learning_rate = 1e-6
+    # learning_rate = 0.001
     model_optimizer = Adam(model_params, lr=learning_rate)
     DP_optimizer = Adam(DP_params, lr=learning_rate)
     
@@ -144,7 +163,7 @@ def main2():
     # optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, eps=1e-8)
     # optimizer = Adam(model.parameters(), lr=learning_rate)
 
-    suffix = 'new_3.0eps/'
+    suffix = 'newfrac_1.0eps_newinit_k1/'
     os.makedirs('model_dict/'+ suffix, exist_ok=True)
     
     whole_record_path = 'model_dict/' + suffix + 'whole_record.txt'
@@ -152,7 +171,8 @@ def main2():
     save_model_path = 'model_dict/' + suffix + 'best_f1.pickle'
     # model.load_state_dict(torch.load(load_model_path), strict=False)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     
     # model = SingleStream().to(device)
     model = model.to(device)  # 不并行能跑

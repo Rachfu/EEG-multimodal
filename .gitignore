@@ -1,0 +1,11 @@
+*.pickle
+__pycache__/
+*.pth
+model_dict/ConcatModel_v2/
+model_dict/ConcatModel_v3/
+model_dict/PriGumbel/
+model_dict/SingleBert/
+model_dict/har_ViLT/
+model_dict/PriConcat/
+experiment/
+model_dict/seedPriConcat/fineturn3/
