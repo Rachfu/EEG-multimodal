@@ -33,7 +33,7 @@ def set_seed(seed):
 set_seed(980616)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
-device = torch.device('cuda', 1)
+device = torch.device('cuda', 3)
 warnings.filterwarnings('ignore')
 
 # * clip_path -> action_path
@@ -77,7 +77,7 @@ def cal_loss(prediction, label):
         return loss, accuracy, pred_label_id, label
 
 class ConcatModel(nn.Module):
-    def __init__(self):
+    def __init__(self,epsilon):
         super().__init__()
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.visual_encoder = nn.Linear(512, 768)
@@ -91,20 +91,19 @@ class ConcatModel(nn.Module):
             nn.Tanh(),
         )
         self.classifier = nn.Linear(768, 2)
-        # self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
         # self.DP = nn.Parameter(torch.cat((torch.full((1, 768), 0.4), torch.full((1, 768), 0.5), torch.full((1, 768), 0.3)), dim=1)) # not bad init; 反的results in newfrac_1.0eps_tt; 这个结果在 newfrac_1.0eps_newinit
         
-        with open('feawei.pkl', 'rb') as f:
-            weight = pickle.load(f)
-        mean_values = np.mean(weight, axis=0)
-        mean_values = (mean_values-np.mean(mean_values))/np.std(mean_values)
-        w_init = 1-F.sigmoid(torch.tensor(1 * (mean_values), dtype=torch.float32))
-        # w_init = F.sigmoid(torch.tensor(1 * (1-mean_values), dtype=torch.float32))
-        # self.DP = nn.Parameter(w_init.unsqueeze(0))
-        self.DP = nn.Parameter(torch.cat((torch.full((1, 768), 0.4), torch.full((1, 768), 0.5), torch.full((1, 768), 0.3)), dim=1) + w_init.unsqueeze(0)-0.5)  # 结果在newfrac_1.0eps_newinit_1
+
+        # with open('feawei.pkl', 'rb') as f:
+        #     weight = pickle.load(f)
+        # mean_values = np.mean(weight, axis=0)
+        # mean_values = (mean_values-np.mean(mean_values))/np.std(mean_values)
+        # w_init = 1-F.sigmoid(torch.tensor(1 * (mean_values), dtype=torch.float32))
+        # self.DP = nn.Parameter(torch.cat((torch.full((1, 768), 0.4), torch.full((1, 768), 0.5), torch.full((1, 768), 0.3)), dim=1) + w_init.unsqueeze(0)-0.5)  # 结果在newfrac_1.0eps_newinit_1
 
         self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
-        self.eps = torch.tensor(1.0) # pre:1.0,0.1
+        self.eps = torch.tensor(epsilon) # pre:1.0,0.1
 
     def forward(self, frame_input, vedio_mask, title_input, text_mask,hard):
         vision_embedding = self.visual_encoder(frame_input)
@@ -140,17 +139,18 @@ class ConcatModel(nn.Module):
         return prediction
 
 
-def main2():
+def main2(epsilon,suffix):
     '''
     Adding noise with Lap to all features
     '''
+    
     batch_size = 8
     train_dataset = MultiModalDataset_ti('feature/train_EEG.csv','feature/action/train_clip_v2.pickle','feature/EEG/train_bert.pickle')
     val_dataset = MultiModalDataset_ti('feature/test_EEG.csv','feature/action/test_clip_v2.pickle','feature/EEG/test_bert.pickle')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-    model = ConcatModel()
+    model = ConcatModel(epsilon)
 
     DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
     model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
@@ -163,12 +163,11 @@ def main2():
     # optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, eps=1e-8)
     # optimizer = Adam(model.parameters(), lr=learning_rate)
 
-    suffix = 'newfrac_1.0eps_newinit_k1/'
-    os.makedirs('model_dict/'+ suffix, exist_ok=True)
+    os.makedirs('model_dict/eps_experiment/'+ suffix, exist_ok=True)
     
-    whole_record_path = 'model_dict/' + suffix + 'whole_record.txt'
-    best_record_path = 'model_dict/' + suffix + 'best_record.txt'
-    save_model_path = 'model_dict/' + suffix + 'best_f1.pickle'
+    whole_record_path = 'model_dict/eps_experiment/' + suffix + 'whole_record.txt'
+    best_record_path = 'model_dict/eps_experiment/' + suffix + 'best_record.txt'
+    save_model_path = 'model_dict/eps_experiment/' + suffix + 'best_f1.pickle'
     # model.load_state_dict(torch.load(load_model_path), strict=False)
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -252,6 +251,11 @@ def main2():
 
 
 
-if __name__ == '__main__':
-    main2()
+if __name__ == '__main__':    
+    epsilon_list = np.logspace(np.log10(0.01), np.log10(5.0), 20)
+    epsilon_list = np.around(epsilon_list, decimals=3)
+    i = 19
+    epsilon = epsilon_list[i]
+    suffix = str(epsilon)+'/'
+    main2(epsilon,suffix)
     

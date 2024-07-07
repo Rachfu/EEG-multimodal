@@ -6,6 +6,8 @@ import torch.nn.functional as F
 import numpy as np
 import scipy.stats as stats
 import pickle
+import os
+from matplotlib.colors import LogNorm
 
 ####################################### figure_with_epoch #######################################
 def main_epoch():
@@ -123,12 +125,131 @@ def acc_best():
     plt.savefig('plot_new/cp4_fig3.pdf') 
     plt.close()
 
+def eps_epoch():
+    epsilon_list = np.logspace(np.log10(0.01), np.log10(5.0), 20)
+    epsilon_list = np.around(epsilon_list, decimals=3)
+
+    epochs = 50
+    val_accuracies = []
+
+    # 读取每个子文件夹中的数据
+    for epsilon in epsilon_list:
+        folder_name = f"model_dict/eps_experiment/{epsilon}"
+        file_path = os.path.join(folder_name, "whole_record.txt")
+        
+        if not os.path.exists(file_path):
+            print(f"File {file_path} does not exist.")
+            continue
+        
+        val_acc = []
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                if "Train Accuracy" in line:  # revised for train and val
+                    val_acc_value = float(line.split(":")[1].strip())
+                    val_acc.append(val_acc_value)
+        
+        if len(val_acc) == epochs:
+            val_accuracies.append(val_acc)
+        else:
+            print(f"File {file_path} does not contain {epochs} epochs of data.")
+    plt.figure(figsize=(10, 6))
+
+# 使用渐变颜色
+    colors = plt.cm.viridis(np.linspace(0, 1, len(epsilon_list)))
+
+    for i, (val_acc, epsilon) in enumerate(zip(val_accuracies, epsilon_list)):
+        # plt.plot(range(1, epochs + 1), val_acc, label=f"eps=exp({np.exp(epsilon):.2f})", color=colors[i])
+        plt.plot(range(1, epochs + 1), val_acc, label=f"eps={epsilon}", color=colors[i])
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Train accuracy')
+    plt.title('Train accuracy over epochs for different privacy budget')
+    plt.legend(loc='best', fontsize='small', ncol=2)
+    # plt.colorbar(plt.cm.ScalarMappable(cmap=plt.cm.viridis), label='Privacy budget')
+    plt.colorbar(plt.cm.ScalarMappable(cmap=plt.cm.viridis, norm=LogNorm(vmin=epsilon_list.min(), vmax=epsilon_list.max())), label='Privacy budget (log scale)')
+    # plt.colorbar(plt.cm.ScalarMappable(cmap=plt.cm.viridis), label='Privacy budget')
+    plt.grid(True)
+    plt.savefig('plot_new/cp4_fig4.pdf') 
+    # plt.savefig('tt.pdf') 
+    plt.close()
+            
+def eps_best():
+    epsilon_list = np.logspace(np.log10(0.01), np.log10(5.0), 20)
+    epsilon_list = np.around(epsilon_list, decimals=3)
+
+    # 准备存储每个实验的最佳 Val Accuracy 和第10个epoch的 Val Accuracy
+    best_val_accuracies = []
+    epoch10_val_accuracies = []
+
+    # 读取每个子文件夹中的数据
+    for epsilon in epsilon_list:
+        folder_name = f"model_dict/eps_experiment/{epsilon}"
+        
+        # 读取 best_record.txt 中的最佳 Val Accuracy
+        best_file_path = os.path.join(folder_name, "best_record.txt")
+        if not os.path.exists(best_file_path):
+            print(f"File {best_file_path} does not exist.")
+            best_val_accuracies.append(None)
+        else:
+            with open(best_file_path, 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    if "Val Accuracy" in line:
+                        val_acc_value = float(line.split(":")[1].strip())
+                        best_val_accuracies.append(val_acc_value)
+                        break
+
+        # 读取 whole_record.txt 中第10个epoch的 Val Accuracy
+        whole_file_path = os.path.join(folder_name, "whole_record.txt")
+        if not os.path.exists(whole_file_path):
+            print(f"File {whole_file_path} does not exist.")
+            epoch10_val_accuracies.append(None)
+        else:
+            with open(whole_file_path, 'r') as file:
+                lines = file.readlines()
+                for i, line in enumerate(lines):
+                    if "Epochs: 10" in lines[i]:
+                        for j in range(i, len(lines)):
+                            if "Val Accuracy" in lines[j]:
+                                val_acc_value = float(lines[j].split(":")[1].strip())
+                                epoch10_val_accuracies.append(val_acc_value)
+                                break
+                        break
+
+    # 检查是否成功读取了所有数据
+    if len(best_val_accuracies) != len(epsilon_list):
+        print("Warning: Some best Val Accuracy data might be missing.")
+    if len(epoch10_val_accuracies) != len(epsilon_list):
+        print("Warning: Some epoch10 Val Accuracy data might be missing.")
+
+    # 绘制图形
+    plt.figure(figsize=(10, 6))
+
+    # 绘制最佳 Val Accuracy 曲线
+    plt.plot(epsilon_list, best_val_accuracies, marker='o', linestyle='-', color='#87CEEB', label='Best Val Accuracy within 50 Epoches')
+
+    # 绘制第10个epoch的 Val Accuracy 曲线
+    plt.plot(epsilon_list, epoch10_val_accuracies, marker='x', linestyle='--', color='#2774AE', label='Val Accuracy at Epoch 10')
+
+    plt.xscale('log')
+    plt.xlabel('Privacy budget')
+    plt.ylabel('Validation accuracy')
+    plt.title('Validation accuracy for different privacy budget')
+    plt.legend(loc='best')
+    plt.grid(True)
+
+    plt.savefig('plot_new/cp4_fig6.pdf') 
+    plt.close()
+
 
 
 if __name__ == '__main__':
     # main_epoch()
     # feature()
-    acc_best()
+    # acc_best()
+    # eps_epoch()
+    eps_best()
     
         
 
