@@ -236,10 +236,10 @@ def eps_best():
     plt.figure(figsize=(10, 6))
 
     # 绘制最佳 Val Accuracy 曲线
-    plt.plot(epsilon_list, best_val_accuracies, marker='o', linestyle='-', color='#87CEEB', label='Best Val Accuracy within 50 Epoches',linewidth=2,markersize=8)
+    plt.plot(epsilon_list, best_val_accuracies, marker='o', linestyle='-', color='#87CEEB', label='Best Val Accuracy within 50 Epoches',linewidth=4,markersize=10)
 
     # 绘制第10个epoch的 Val Accuracy 曲线
-    plt.plot(epsilon_list, epoch10_val_accuracies, marker='x', linestyle='--', color='#2774AE', label='Val Accuracy at Epoch 10',linewidth=2,markersize=8)
+    plt.plot(epsilon_list, epoch10_val_accuracies, marker='x', linestyle='--', color='#2774AE', label='Val Accuracy at Epoch 10',linewidth=4,markersize=10,markeredgewidth=4)
 
     plt.xscale('log')
     plt.xlabel('Privacy budget',fontsize=12)
@@ -325,11 +325,11 @@ def feature_new():
     plt.close()
 
 if __name__ == '__main__':
-    main_epoch()
+    # main_epoch()
     # feature()
     # acc_best()
     # eps_epoch()
-    # eps_best()
+    eps_best()
     # feature_new()
     
         
