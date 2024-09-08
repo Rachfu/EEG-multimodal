@@ -45,7 +45,7 @@ def main_epoch():
         train_loss, val_loss = loss
 
         axs[i,0].plot(epoch, train_acc, label='Train Accuracy',color = '#FF928B',linewidth=4) #B3D9FB
-        axs[i,0].plot(epoch, val_acc, label='Val Accuracy', color = '#B3D9FB',linewidth=4)  # linewidth changes from 2 to 4
+        axs[i,0].plot(epoch, val_acc, label='Test Accuracy', color = '#B3D9FB',linewidth=4)  # linewidth changes from 2 to 4
         max_train_idx = train_acc.index(max(train_acc))
         max_val_idx = val_acc.index(max(val_acc))
         axs[i,0].scatter(max_train_idx, train_acc[max_train_idx], color='#FE6F5E', s=100, marker='*', zorder=10) # zorder changes from 5 to 8
@@ -58,7 +58,7 @@ def main_epoch():
         axs[i,0].grid(True, linestyle='--', linewidth=0.5, color='#C0C0C0', alpha=0.5)  # 自定义网格线样式
 
         axs[i,1].plot(epoch, train_loss, label='Train Loss',color = '#FF928B',linewidth=4) #B3D9FB
-        axs[i,1].plot(epoch, val_loss, label='Val Loss', color = '#B3D9FB',linewidth=4)
+        axs[i,1].plot(epoch, val_loss, label='Test Loss', color = '#B3D9FB',linewidth=4)
         axs[i,1].set_title(f'Loss with $\\epsilon$ = {e_list[i]}',fontsize = 14)
         axs[i,1].set_xlabel('Epoch',fontsize = 12)
         axs[i,1].set_ylabel('Loss',fontsize = 12) 
@@ -166,8 +166,8 @@ def eps_epoch():
     plt.xlabel('Epoch',fontsize=12)
     # plt.ylabel('Train accuracy',fontsize=12)
     # plt.title('Train accuracy over epochs for different privacy budget',fontsize=14)
-    plt.ylabel('Validation accuracy',fontsize=12)
-    plt.title('Validation accuracy over epochs for different privacy budget',fontsize=14)
+    plt.ylabel('Test accuracy',fontsize=12)
+    plt.title('Test accuracy over epochs for different privacy budget',fontsize=14)
 
     plt.legend(loc='best', fontsize='small', ncol=2)
     # plt.colorbar(plt.cm.ScalarMappable(cmap=plt.cm.viridis), label='Privacy budget')
@@ -236,15 +236,15 @@ def eps_best():
     plt.figure(figsize=(10, 6))
 
     # 绘制最佳 Val Accuracy 曲线
-    plt.plot(epsilon_list, best_val_accuracies, marker='o', linestyle='-', color='#87CEEB', label='Best Val Accuracy within 50 Epoches',linewidth=4,markersize=10)
+    plt.plot(epsilon_list, best_val_accuracies, marker='o', linestyle='-', color='#87CEEB', label='Best Test Accuracy within 50 Epoches',linewidth=4,markersize=10)
 
     # 绘制第10个epoch的 Val Accuracy 曲线
-    plt.plot(epsilon_list, epoch10_val_accuracies, marker='x', linestyle='--', color='#2774AE', label='Val Accuracy at Epoch 10',linewidth=4,markersize=10,markeredgewidth=4)
+    plt.plot(epsilon_list, epoch10_val_accuracies, marker='x', linestyle='--', color='#2774AE', label='Test Accuracy at Epoch 10',linewidth=4,markersize=10,markeredgewidth=4)
 
     plt.xscale('log')
     plt.xlabel('Privacy budget',fontsize=12)
-    plt.ylabel('Validation accuracy',fontsize=12)
-    plt.title('Validation accuracy for different privacy budget',fontsize=14)
+    plt.ylabel('Test accuracy',fontsize=12)
+    plt.title('Test accuracy for different privacy budget',fontsize=14)
     plt.legend(loc='best',fontsize=12)
     plt.grid(True)
 
