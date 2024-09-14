@@ -54,6 +54,8 @@ def main_epoch():
         axs[i,0].set_xlabel('Epoch',fontsize = 12)
         axs[i,0].set_ylabel('Accuracy',fontsize = 12) 
         axs[i,0].legend(loc='lower right',fontsize = 12)
+        axs[i,0].set_ylim(0.5, 1.05)
+        axs[i,0].set_yticks(np.arange(0.5, 1.05, 0.1))
         # axs[i,0].set_ylim(0.6,1.0)
         axs[i,0].grid(True, linestyle='--', linewidth=0.5, color='#C0C0C0', alpha=0.5)  # 自定义网格线样式
 
@@ -63,6 +65,8 @@ def main_epoch():
         axs[i,1].set_xlabel('Epoch',fontsize = 12)
         axs[i,1].set_ylabel('Loss',fontsize = 12) 
         axs[i,1].legend(loc='upper right',fontsize = 12)
+        axs[i,1].set_ylim(0.0, 0.75)
+        axs[i,1].set_yticks(np.arange(0.0, 0.75, 0.1))
         # axs[i,1].set_ylim(0.6,1.0)
         axs[i,1].grid(True, linestyle='--', linewidth=0.5, color='#C0C0C0', alpha=0.5)  # 自定义网格线样式
     plt.tight_layout()
@@ -325,11 +329,11 @@ def feature_new():
     plt.close()
 
 if __name__ == '__main__':
-    # main_epoch()
+    main_epoch()
     # feature()
     # acc_best()
     # eps_epoch()
-    eps_best()
+    # eps_best()
     # feature_new()
     
         
