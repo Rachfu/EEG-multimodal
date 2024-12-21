@@ -32,6 +32,11 @@ class TransferToImage(Dataset):
                 df_tensor = torch.Tensor(df_list).reshape(3,3,3).permute(2,0,1).unsqueeze(0)
                 df_tensor = pad(op_upsample(df_tensor)).squeeze(0) # torch.size(3,224,224)
                 self.tensor.append(df_tensor)
+            if modal_type == "EEG":
+                df_tensor = torch.Tensor(df_list).reshape(3,2,5).permute(2,0,1).unsqueeze(0)
+                df_tensor = pad(op_upsample(df_tensor)).squeeze(0) # torch.size(3,224,224)
+                print(df_tensor.shape)
+                self.tensor.append(df_tensor)
     def __len__(self):
         return len(self.tensor)
     def __getitem__(self, index):
@@ -59,14 +64,17 @@ def img_encode(data_path,modal_type,process_model,coef_model):
 # !pwd python
 # !mkdir embedding embedding/img embedding/txt
 
-for data_path in ["../dataset/train_act.csv", "../dataset/test_act.csv"]:
-    modal_type = "act"
-    for process_model,coef_model in [['clip','ViT-B/32'],['clip','ViT-B/16']]:
-        img_encode_array = img_encode(data_path,modal_type,process_model,coef_model)
-        coef_model_path = coef_model.replace("/","_").replace("-","_")
-        save_path = "img/ + modal_type" + "/" + process_model + "_" + coef_model_path + "_embedding.pickle"
-        with open(save_path, 'wb') as f:
-            img_encode_array.dump(f)
+# for modal in ["act","EEG"]:
+for modal in ["EEG"]:
+    modal_type = modal
+    for data_path in ["../dataset/train_" + modal +".csv", "../dataset/test_" + modal +".csv"]:
+        for process_model,coef_model in [['clip','ViT-B/32'],['clip','ViT-B/16']]:
+            img_encode_array = img_encode(data_path,modal_type,process_model,coef_model)
+            print(modal_type, process_model, coef_model)
+            coef_model_path = coef_model.replace("/","_").replace("-","_")
+            save_path = "img/" + modal_type + "/" + process_model + "_" + coef_model_path + "_embedding.pickle"
+            with open(save_path, 'wb') as f:
+                img_encode_array.dump(f)
 
 
 
