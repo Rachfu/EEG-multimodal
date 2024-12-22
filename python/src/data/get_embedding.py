@@ -3,13 +3,11 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 import pandas as pd
 import numpy as np
-# from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset,DataLoader
-from torchvision.transforms import Compose,Resize,CenterCrop,Normalize,ToTensor
+from torch.utils.data import Dataset
 import clip
-from torchvision.models import resnet34,resnet50
+from torchvision.models import resnet34
 from transformers import BertTokenizer
 from tqdm import tqdm
 import pickle
@@ -19,10 +17,6 @@ from scipy.interpolate import interp1d
 # image_embedding
 class TransferToImage(Dataset):
     def __init__(self,data_path,modal_type):
-        """
-        data_path: "train_EEG.csv", "test_EEG.csv", "train_act.csv", "test_act.csv"
-        modal_type: "EEG", "act"
-        """
         self.tensor = []
         df = pd.read_csv(data_path)
         op_upsample = nn.Upsample(scale_factor=74,mode='nearest')
@@ -53,60 +47,6 @@ class TransferToImage(Dataset):
     def __getitem__(self, index):
         return torch.FloatTensor(self.tensor[index])
     
-# def img_encode(data_path,modal_type,process_model,coef_model):
-#     """
-#     data_path: "train_EEG.csv", "test_EEG.csv", "train_act.csv", "test_act.csv"
-#     modal_type: "EEG", "act"
-#     process_model: "clip"
-#     coef_model: "ViT-B/32","ViT-B/16"
-#     """
-#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-#     if process_model == "clip":
-#         model, preprocess = clip.load(coef_model)
-#         model = model.to(device)
-#         dataset = TransferToImage(data_path,modal_type)
-#         dataloader = torch.utils.data.DataLoader(dataset,batch_size=16,shuffle=False)
-#         encode=[]
-#         with torch.no_grad():
-#             for data in tqdm(dataloader):
-#                 encode.append(model.encode_image(data.to(device)))
-#         encode_array = np.array(torch.cat(encode,dim=0).detach().cpu())
-#     if process_model == "resnet":
-#         if coef_model == "resnet34":
-#             model = resnet34()
-#             model.load_state_dict(torch.load("../model/resnet34.pth"))
-#             model.eval()
-#             model.fc = torch.nn.Identity()
-#             dataset = TransferToImage(data_path,modal_type)
-#             dataloader = torch.utils.data.DataLoader(dataset,batch_size=16,shuffle=False)
-#             encode=[]
-#             with torch.no_grad():
-#                 for data in tqdm(dataloader):
-#                     encode.append(model(data))
-#             encode_array = np.array(torch.cat(encode,dim=0).detach())
-#     print(encode_array.shape)
-#     del encode
-#     torch.cuda.empty_cache()
-#     torch.cuda.synchronize()
-#     return encode_array
-# !pwd python
-# !mkdir embedding embedding/img embedding/txt
-
-# for modal in ["act","EEG"]:
-#     for data_train_test in ["train","test"]:
-#         data_path = "../dataset/" + data_train_test + "_" + modal +".csv"
-#         for process_model,coef_model in [['clip','ViT-B/16'],['clip','ViT-B/32'],['resnet','resnet34']]:
-#             img_encode_array = img_encode(data_path,modal,process_model,coef_model)
-#             print(modal, process_model, coef_model, data_train_test)
-#             coef_model_path = coef_model.replace("/","_").replace("-","_")
-#             save_path = modal+"/"+"img/"+ process_model + "_" + coef_model_path + "/" 
-#             if not os.path.exists(save_path):
-#                 os.makedirs(save_path)
-#             with open(save_path + data_train_test +".pickle", 'wb') as f:
-#                 img_encode_array.dump(f)
-
-
 class GetEmbedding(object):
     def __init__(self,modal_list,data_train_test_list):
         self.modal_list = modal_list
@@ -115,10 +55,7 @@ class GetEmbedding(object):
 
     def img_encode(self,data_path,modal_type,process_model,coef_model):
         """
-        data_path: "train_EEG.csv", "test_EEG.csv", "train_act.csv", "test_act.csv"
-        modal_type: "EEG", "act"
-        process_model: "clip"
-        coef_model: "ViT-B/32","ViT-B/16"
+        note: an example to use gpu to encode img
         """
         device = self.device
         
@@ -135,7 +72,7 @@ class GetEmbedding(object):
         if process_model == "resnet":
             if coef_model == "resnet34":
                 model = resnet34()
-                model.load_state_dict(torch.load("../model/resnet34.pth"))
+                model.load_state_dict(torch.load("models/pretrained/resnet34.pth"))
                 model.eval()
                 model.fc = torch.nn.Identity()
                 dataset = TransferToImage(data_path,modal_type)
@@ -154,12 +91,12 @@ class GetEmbedding(object):
     def get_img_encode(self,img_process_coef_model_list):
         for modal in self.modal_list:
             for data_train_test in self.data_train_test_list:
-                data_path = "../dataset/" + data_train_test + "_" + modal +".csv"
+                data_path = "data/processed/" + data_train_test + "_" + modal +".csv"
                 for process_model,coef_model in img_process_coef_model_list:
-                    img_encode_array = img_encode(data_path,modal,process_model,coef_model)
+                    img_encode_array = self.img_encode(data_path,modal,process_model,coef_model)
                     print(modal, process_model, coef_model, data_train_test)
                     coef_model_path = coef_model.replace("/","_").replace("-","_")
-                    save_path = modal+"/"+"img/"+ process_model + "_" + coef_model_path + "/" 
+                    save_path = "data/embedding"+modal+"/"+"img/"+ process_model + "_" + coef_model_path + "/" 
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)
                     with open(save_path + data_train_test +".pickle", 'wb') as f:
@@ -167,9 +104,7 @@ class GetEmbedding(object):
 
     def text_encode(self,data_path,process_model,coef_model):
         """
-        data_path: "train_EEG.csv", "test_EEG.csv", "train_action.csv", "test_action.csv"
-        process_model: "bert"
-        coef_model: "bert-base-uncased","bert-base-cased"
+        note: an example to use cpu to encode text
         """
         df = pd.read_csv(data_path)
         text_embedding=[]
@@ -184,20 +119,20 @@ class GetEmbedding(object):
     def get_text_encode(self,txt_process_coef_model_list):
         for modal in self.modal_list:
             for data_train_test in self.data_train_test_list:
-                data_path = "../dataset/" + data_train_test + "_" + modal +".csv"
+                data_path = "data/processed/" + data_train_test + "_" + modal +".csv"
                 for process_model,coef_model in txt_process_coef_model_list:
-                    txt_embedding = text_encode(data_path,process_model,coef_model)
+                    txt_embedding = self.text_encode(data_path,process_model,coef_model)
                     print(modal, process_model, coef_model, data_train_test)
                     coef_model_path = coef_model.replace("/","_").replace("-","_")
-                    save_path = modal+"/"+"txt/"+ process_model + "_" + coef_model_path + "/" 
+                    save_path = "data/embedding"+modal+"/"+"txt/"+ process_model + "_" + coef_model_path + "/" 
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)
                     with open(save_path + data_train_test +".pickle", 'wb') as f:
                         pickle.dump(txt_embedding,f)
     
     def run(self,img_process_coef_model_list,txt_process_coef_model_list):
-        self.get_img_encode(self,img_process_coef_model_list)
-        self.get_text_encode(self,txt_process_coef_model_list)
+        self.get_img_encode(img_process_coef_model_list)
+        self.get_text_encode(txt_process_coef_model_list)
 
 if __name__ == '__main__':
     modal_list= ["act","EEG"]
@@ -207,36 +142,3 @@ if __name__ == '__main__':
 
     python_job = GetEmbedding(modal_list,data_train_test_list)
     python_job.run(img_process_coef_model_list,txt_process_coef_model_list)
-
-
-
-
-# def text_encode(data_path,process_model,coef_model):
-#     """
-#     data_path: "train_EEG.csv", "test_EEG.csv", "train_action.csv", "test_action.csv"
-#     process_model: "bert"
-#     coef_model: "bert-base-uncased","bert-base-cased"
-#     """
-#     df = pd.read_csv(data_path)
-#     text_embedding=[]
-#     if process_model == "bert":
-#         tokenizer = BertTokenizer.from_pretrained(coef_model)
-#         for i in range(len(df)):
-#             sentence = " ".join([str(j) for j in df.loc[i].tolist()])
-#             text_encode = tokenizer(sentence,padding="max_length",truncation=True,max_length=512)
-#             text_embedding.append(text_encode)
-#     return text_embedding
-
-# for modal in ["act","EEG"]:
-#     for data_train_test in ["train","test"]:
-#         data_path = "../dataset/" + data_train_test + "_" + modal +".csv"
-#         for process_model,coef_model in [['bert','bert-base-uncased'],['bert','bert-base-cased']]:
-#             txt_embedding = text_encode(data_path,process_model,coef_model)
-#             print(modal, process_model, coef_model, data_train_test)
-#             coef_model_path = coef_model.replace("/","_").replace("-","_")
-#             save_path = modal+"/"+"txt/"+ process_model + "_" + coef_model_path + "/" 
-#             if not os.path.exists(save_path):
-#                 os.makedirs(save_path)
-#             with open(save_path + data_train_test +".pickle", 'wb') as f:
-#                 pickle.dump(txt_embedding,f)
-    
