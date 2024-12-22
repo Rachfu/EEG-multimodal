@@ -8,6 +8,8 @@ from sklearn.metrics import f1_score
 import os
 from opacus import PrivacyEngine
 import numpy as np
+import torch.nn.functional as F
+
 
 def set_seed(seed):
     # 设置 PyTorch 的随机种子
@@ -33,12 +35,19 @@ class DoubleStream_ti(nn.Module):
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
-        hidden_dropout_prob = 0.1
-        self.dropout = nn.Dropout(hidden_dropout_prob)
-        self.classifier = nn.Linear(768*3, 2)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
         
-    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask,epsilon):
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask,epsilon,hard):
         device = self.device
+        eps = torch.tensor(epsilon)
         eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
                                                                  attention_mask=eeg_txt_mask,
                                                                  return_dict=False) #768
@@ -51,16 +60,18 @@ class DoubleStream_ti(nn.Module):
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
         if self.dp_mode == 'dropout_laplacian':
-            pooled_output  = self.dropout(feature_concat)
-            pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
-            lap_sigma=1/epsilon
-            m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
-            noise = m.sample([pooled_output.shape[0]]).to(device)
-            pooled_output += noise.view(-1, 1)
-            feature_concat = pooled_output
-        prediction = self.classifier(feature_concat)
+            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+            feature = (feature_concat - feature_min) / (feature_max - feature_min)
+            w = F.sigmoid(self.DP)
+            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+            feature = feature + noise * eps_hat
+            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                    hard=hard, dim=0)
+            feature = (feature * mask).sum(0)
+            feature = self.fc_layers(feature)
+            prediction = self.classifier(feature)
         return prediction
 
 class DoubleStream_tt(nn.Module):
@@ -72,12 +83,19 @@ class DoubleStream_tt(nn.Module):
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
-        hidden_dropout_prob = 0.1
-        self.dropout = nn.Dropout(hidden_dropout_prob)
-        self.classifier = nn.Linear(768*3, 2)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
         
-    def forward(self, eeg_txt_input,eeg_txt_mask,act_txt_input,act_txt_mask,epsilon):
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_txt_input,act_txt_mask,epsilon,hard):
         device = self.device
+        eps = torch.tensor(epsilon)
         eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
                                                                  attention_mask=eeg_txt_mask,
                                                                  return_dict=False) #768
@@ -90,16 +108,18 @@ class DoubleStream_tt(nn.Module):
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_txt_feature, act_txt_feature,cross_attn_result),dim=1)
         if self.dp_mode == 'dropout_laplacian':
-            pooled_output  = self.dropout(feature_concat)
-            pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
-            lap_sigma=1/epsilon
-            m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
-            noise = m.sample([pooled_output.shape[0]]).to(device)
-            pooled_output += noise.view(-1, 1)
-            feature_concat = pooled_output
-        prediction = self.classifier(feature_concat)
+            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+            feature = (feature_concat - feature_min) / (feature_max - feature_min)
+            w = F.sigmoid(self.DP)
+            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+            feature = feature + noise * eps_hat
+            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                    hard=hard, dim=0)
+            feature = (feature * mask).sum(0)
+            feature = self.fc_layers(feature)
+            prediction = self.classifier(feature)
         return prediction
 
 class DoubleStream_it(nn.Module):
@@ -112,12 +132,19 @@ class DoubleStream_it(nn.Module):
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
-        hidden_dropout_prob = 0.1
-        self.dropout = nn.Dropout(hidden_dropout_prob)
-        self.classifier = nn.Linear(768*3, 2)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
         
-    def forward(self, eeg_img_input,eeg_img_mask,act_txt_input,act_txt_mask,epsilon):
+    def forward(self, eeg_img_input,eeg_img_mask,act_txt_input,act_txt_mask,epsilon,hard):
         device = self.device
+        eps = torch.tensor(epsilon)
         eeg_img_embedding = self.visual_encoder(eeg_img_input)
         eeg_img_feature = eeg_img_embedding.squeeze(1)
         act_txt_semantics_embedding, act_txt_feature = self.bert(input_ids= act_txt_input, 
@@ -130,16 +157,18 @@ class DoubleStream_it(nn.Module):
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_img_feature, act_txt_feature,cross_attn_result),dim=1)
         if self.dp_mode == 'dropout_laplacian':
-            pooled_output  = self.dropout(feature_concat)
-            pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
-            lap_sigma=1/epsilon
-            m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
-            noise = m.sample([pooled_output.shape[0]]).to(device)
-            pooled_output += noise.view(-1, 1)
-            feature_concat = pooled_output
-        prediction = self.classifier(feature_concat)
+            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+            feature = (feature_concat - feature_min) / (feature_max - feature_min)
+            w = F.sigmoid(self.DP)
+            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+            feature = feature + noise * eps_hat
+            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                    hard=hard, dim=0)
+            feature = (feature * mask).sum(0)
+            feature = self.fc_layers(feature)
+            prediction = self.classifier(feature)
         return prediction
 
 class DoubleStream_ii(nn.Module):
@@ -151,31 +180,40 @@ class DoubleStream_ii(nn.Module):
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
-        hidden_dropout_prob = 0.1
-        self.dropout = nn.Dropout(hidden_dropout_prob)
-        self.classifier = nn.Linear(768*3, 2)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
         
-    def forward(self, eeg_img_input,eeg_img_mask,act_img_input,act_img_mask,epsilon):
+    def forward(self, eeg_img_input,eeg_img_mask,act_img_input,act_img_mask,epsilon,hard):
         device = self.device
+        eps = torch.tensor(epsilon)
         eeg_img_embedding = self.visual_encoder(eeg_img_input)
         eeg_img_feature = eeg_img_embedding.squeeze(1)
         act_img_embedding = self.visual_encoder(act_img_input)
         act_img_feature = act_img_embedding.squeeze(1)
         cross_attn_result = self.multi_head_decoder(tgt=eeg_img_embedding.permute(1,0,2), 
-                                                    memory=act_img_embedding.permute(1,0,2),)
+                                                    memory=act_img_embedding.permute(1,0,2))
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_img_feature, act_img_feature,cross_attn_result),dim=1)
         if self.dp_mode == 'dropout_laplacian':
-            pooled_output  = self.dropout(feature_concat)
-            pooled_output_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            pooled_output = (pooled_output - pooled_output_min) / (pooled_output_max - pooled_output_min)
-            lap_sigma=1/epsilon
-            m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
-            noise = m.sample([pooled_output.shape[0]]).to(device)
-            pooled_output += noise.view(-1, 1)
-            feature_concat = pooled_output
-        prediction = self.classifier(feature_concat)
+            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+            feature = (feature_concat - feature_min) / (feature_max - feature_min)
+            w = F.sigmoid(self.DP)
+            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+            feature = feature + noise * eps_hat
+            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                    hard=hard, dim=0)
+            feature = (feature * mask).sum(0)
+            feature = self.fc_layers(feature)
+            prediction = self.classifier(feature)
         return prediction
 
 

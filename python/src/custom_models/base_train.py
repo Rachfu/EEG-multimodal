@@ -15,6 +15,7 @@ import warnings
 from sklearn.metrics import f1_score
 from opacus import PrivacyEngine
 import time
+from datetime import datetime
 
 import numpy as np
 def set_seed(seed):
@@ -52,7 +53,7 @@ class TrainAndTest(object):
             accuracy = (label == pred_label_id).float().sum() / label.shape[0]
         return loss, accuracy, pred_label_id, label
 
-    def train(self,multimodal_type,dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,cross_atn_type,epsilon):
+    def train(self,train_type,multimodal_type,dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,cross_atn_type,epsilon):
         """
         multimodal_type = "ti","tt","it","ii"
         dp_mode: "feature_all_lap"
@@ -60,6 +61,7 @@ class TrainAndTest(object):
         batch_size = self.batch_size
         eeg_model_coef_standardized = eeg_model_coef.replace("/","_").replace("-","_")
         act_model_coef_standardized = act_model_coef.replace("/","_").replace("-","_")
+
         if cross_atn_type == "double_stream":
             if multimodal_type == "ti":
                 eeg_txt_path = "data/embedding/EEG/txt/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
@@ -116,12 +118,19 @@ class TrainAndTest(object):
 
         learning_rate = self.learning_rate
         epochs = self.epochs
-        optimizer = Adam(model.parameters(), lr=learning_rate)
+
+        
+
+        DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
+        model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
+        model_optimizer = Adam(model_params, lr=learning_rate)
+        DP_optimizer = Adam(DP_params, lr=learning_rate)
+
         device = self.device
         model = model.to(device)
 
-        model_path = "models/custom/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
-        log_path = "logs/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
+        model_path = "models/custom/"+ train_type +"/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
+        log_path = "logs/" + train_type +"/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
         for path in [model_path,log_path]:
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -146,22 +155,35 @@ class TrainAndTest(object):
             for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
                 sample_size_train+=1
                 model.train()
-                optimizer.zero_grad()
+                DP_optimizer.zero_grad()
                 eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
                 if multimodal_type == "ti":
-                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = False)
                 elif multimodal_type == "it":
-                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input,act_mask,epsilon)
+                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input,act_mask,epsilon,hard = False)
                 elif multimodal_type == "ii":
-                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = False)
                 else:
-                    prediction = model(eeg_input,eeg_mask,act_input,act_mask,epsilon)
+                    prediction = model(eeg_input,eeg_mask,act_input,act_mask,epsilon,hard = False)
                 loss, accuracy, _, _ = self.cal_loss(prediction,label)  
+                loss.backward()
+                DP_optimizer.step()
+
+                model_optimizer.zero_grad()
+                if multimodal_type == "ti":
+                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = True)
+                elif multimodal_type == "it":
+                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input,act_mask,epsilon,hard = True)
+                elif multimodal_type == "ii":
+                    prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = True)
+                else:
+                    prediction = model(eeg_input,eeg_mask,act_input,act_mask,epsilon,hard = True)
+                loss, accuracy, _, _ = self.cal_loss(prediction,label) 
                 epoch_loss_train += loss.item()
                 epoch_acc_train += accuracy.item()
                 loss.backward()
-                optimizer.step()
-
+                model_optimizer.step()
+                
             prediction_all = []
             label_all = []
             model.eval()
@@ -170,13 +192,13 @@ class TrainAndTest(object):
                     sample_size_test +=1
                     eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
                     if multimodal_type == "ti":
-                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = True)
                     elif multimodal_type == "it":
-                        prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input,act_mask,epsilon)
+                        prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input,act_mask,epsilon,hard = True)
                     elif multimodal_type == "ii":
-                        prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                        prediction = model(eeg_input.to(torch.float32),eeg_mask,act_input.to(torch.float32),act_mask,epsilon,hard = True)
                     else:
-                        prediction = model(eeg_input,eeg_mask,act_input,act_mask,epsilon)
+                        prediction = model(eeg_input,eeg_mask,act_input,act_mask,epsilon,hard = True)
                     loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
                     prediction_all.extend(pred_label_id.cpu().numpy())
                     label_all.extend(label_id.cpu().numpy())
@@ -186,14 +208,16 @@ class TrainAndTest(object):
             f1_score_epoch = f1_score(prediction_all,label_all)
             end_time = time.time()
             time_cost = end_time-start_time
-
+            current_datetime = datetime.now()
+            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
             record = f'''Epochs: {epoch + 1}
             | Train Loss: {epoch_loss_train/sample_size_train: .3f}
             | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
             | Test Loss: {epoch_loss_test/sample_size_test: .3f}
             | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
             | f_1 Score: {f1_score_epoch: .3f}
-            | Time Cost: {time_cost: .1f}\n'''
+            | Time Cost: {time_cost: .1f}
+            | Record Time: {formatted_datetime} \n'''
             print(record)
             with open(whole_log_path, "a") as file:
                 file.write(record)
