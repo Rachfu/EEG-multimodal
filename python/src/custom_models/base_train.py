@@ -1,9 +1,10 @@
 import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import torch
 import torch.nn as nn
+import torch.optim as optim
 from dataset import MultiModalDataset_ti,MultiModalDataset_tt,MultiModalDataset_it,MultiModalDataset_ii
-from models import TICA_LapDropout,TTCA_LapDropout,ITCA_LapDropout,IICA_LapDropout
+from models import TICA_LapDropout,TTCA_LapDropout,ITCA_LapDropout,IICA_LapDropout,TISC_LapDropout,TICA_DPSGD
 import torch
 import numpy as np
 import pandas as pd
@@ -14,6 +15,7 @@ from torch.optim import Adam
 import warnings
 from sklearn.metrics import f1_score
 from opacus import PrivacyEngine
+from opacus.utils import module_modification
 import time
 from datetime import datetime
 import random
@@ -73,65 +75,77 @@ class TrainAndTest(object):
         eeg_model_coef_standardized = eeg_model_coef.replace("/","_").replace("-","_")
         act_model_coef_standardized = act_model_coef.replace("/","_").replace("-","_")
 
+        # dataloader
+        if multimodal_type == "ti":
+            eeg_txt_path = "data/embedding/EEG/txt/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
+            act_img_path = "data/embedding/act/img/" + act_model + "_" + act_model_coef_standardized + "/"
+            label_path = "data/processed/"
+            train_dataset = MultiModalDataset_ti(eeg_txt_path + "train.pickle",
+                                                act_img_path + "train.pickle",
+                                                label_path+"train_label.csv")
+            test_dataset = MultiModalDataset_ti(eeg_txt_path + "test.pickle",
+                                                act_img_path + "test.pickle",
+                                                label_path+"test_label.csv")
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+        if multimodal_type == "tt":
+            eeg_txt_path = "data/embedding/EEG/txt/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
+            act_txt_path = "data/embedding/act/txt/" + act_model + "_" + act_model_coef_standardized + "/"
+            label_path = "data/processed/"
+            train_dataset = MultiModalDataset_tt(eeg_txt_path + "train.pickle",
+                                                act_txt_path + "train.pickle",
+                                                label_path+"train_label.csv")
+            test_dataset = MultiModalDataset_tt(eeg_txt_path + "test.pickle",
+                                                act_txt_path + "test.pickle",
+                                                label_path+"test_label.csv")
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+        if multimodal_type == "it":
+            eeg_img_path = "data/embedding/EEG/img/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
+            act_txt_path = "data/embedding/act/txt/" + act_model + "_" + act_model_coef_standardized + "/"
+            label_path = "data/processed/"
+            train_dataset = MultiModalDataset_it(eeg_img_path + "train.pickle",
+                                                act_txt_path + "train.pickle",
+                                                label_path+"train_label.csv")
+            test_dataset = MultiModalDataset_it(eeg_img_path + "test.pickle",
+                                                act_txt_path + "test.pickle",
+                                                label_path+"test_label.csv")
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+        if multimodal_type == "ii":
+            eeg_img_path = "data/embedding/EEG/img/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
+            act_img_path = "data/embedding/act/img/" + act_model + "_" + act_model_coef_standardized + "/"
+            label_path = "data/processed/"
+            train_dataset = MultiModalDataset_ii(eeg_img_path + "train.pickle",
+                                                act_img_path + "train.pickle",
+                                                label_path+"train_label.csv")
+            test_dataset = MultiModalDataset_ii(eeg_img_path + "test.pickle",
+                                                act_img_path + "test.pickle",
+                                                label_path+"test_label.csv")
+            train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+            
+        # model
         if cross_atn_type == "double_stream":
             if multimodal_type == "ti":
-                eeg_txt_path = "data/embedding/EEG/txt/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
-                act_img_path = "data/embedding/act/img/" + act_model + "_" + act_model_coef_standardized + "/"
-                label_path = "data/processed/"
-                train_dataset = MultiModalDataset_ti(eeg_txt_path + "train.pickle",
-                                                    act_img_path + "train.pickle",
-                                                    label_path+"train_label.csv")
-                test_dataset = MultiModalDataset_ti(eeg_txt_path + "test.pickle",
-                                                    act_img_path + "test.pickle",
-                                                    label_path+"test_label.csv")
-                train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
                 if dp_mode == 'lapacian_dropout':
                     model = TICA_LapDropout(bert_coef = eeg_model_coef)
+                if dp_mode == "DPSGD":
+                    model = TICA_DPSGD(bert_coef = eeg_model_coef)
             if multimodal_type == "tt":
-                eeg_txt_path = "data/embedding/EEG/txt/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
-                act_txt_path = "data/embedding/act/txt/" + act_model + "_" + act_model_coef_standardized + "/"
-                label_path = "data/processed/"
-                train_dataset = MultiModalDataset_tt(eeg_txt_path + "train.pickle",
-                                                    act_txt_path + "train.pickle",
-                                                    label_path+"train_label.csv")
-                test_dataset = MultiModalDataset_tt(eeg_txt_path + "test.pickle",
-                                                    act_txt_path + "test.pickle",
-                                                    label_path+"test_label.csv")
-                train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
                 if dp_mode == 'lapacian_dropout':
                     model = TTCA_LapDropout(bert_coef = eeg_model_coef)
             if multimodal_type == "it":
-                eeg_img_path = "data/embedding/EEG/img/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
-                act_txt_path = "data/embedding/act/txt/" + act_model + "_" + act_model_coef_standardized + "/"
-                label_path = "data/processed/"
-                train_dataset = MultiModalDataset_it(eeg_img_path + "train.pickle",
-                                                    act_txt_path + "train.pickle",
-                                                    label_path+"train_label.csv")
-                test_dataset = MultiModalDataset_it(eeg_img_path + "test.pickle",
-                                                    act_txt_path + "test.pickle",
-                                                    label_path+"test_label.csv")
-                train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
                 if dp_mode == 'lapacian_dropout':
                     model = ITCA_LapDropout(bert_coef = eeg_model_coef)
             if multimodal_type == "ii":
-                eeg_img_path = "data/embedding/EEG/img/" + eeg_model + "_" + eeg_model_coef_standardized + "/"
-                act_img_path = "data/embedding/act/img/" + act_model + "_" + act_model_coef_standardized + "/"
-                label_path = "data/processed/"
-                train_dataset = MultiModalDataset_ii(eeg_img_path + "train.pickle",
-                                                    act_img_path + "train.pickle",
-                                                    label_path+"train_label.csv")
-                test_dataset = MultiModalDataset_ii(eeg_img_path + "test.pickle",
-                                                    act_img_path + "test.pickle",
-                                                    label_path+"test_label.csv")
-                train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
                 if dp_mode == 'lapacian_dropout':
-                    model = IICA_LapDropout()
+                    model = IICA_LapDropout()    
         if cross_atn_type == "single_stream":
-            
+            if multimodal_type == "ti":
+                if dp_mode == 'lapacian_dropout':
+                    model = TISC_LapDropout(bert_coef = eeg_model_coef)
+
         # training settings
         learning_rate = self.learning_rate
         epochs = self.epochs
@@ -145,7 +159,7 @@ class TrainAndTest(object):
         best_log_path = log_path+"best_record.txt"
         f1_score_best = 0.5
 
-        
+        # train
         if dp_mode == "lapacian_dropout":
             DP_params = [p for n, p in model.named_parameters() if 'DP' in n]
             model_params = [p for n, p in model.named_parameters() if 'DP' not in n]
@@ -235,15 +249,123 @@ class TrainAndTest(object):
                     f1_score_best = f1_score_epoch
                     with open(best_log_path, "w") as file:
                         file.write(f1_best_record)
+        
+
+        if dp_mode == "DPSGD":
+            # trainable_layers = [model.bert.encoder.layer[-1],model.fc_layers,model.classifier]
+            # trainable_layers = [model.fc_layers,model.classifier]
+            # params_DP = []
+            # for layer in trainable_layers:
+            #     params_DP.extend(layer.parameters())
+            # print(params_DP)
+            # dp_optimizer = Adam(params_DP, lr=learning_rate)
+            # privacy_engine = PrivacyEngine()
+            # model, dp_optimizer, train_dataloader = privacy_engine.make_private_with_epsilon(
+            #     module=model,
+            #     optimizer=dp_optimizer,
+            #     data_loader=train_dataloader,
+            #     target_delta= 1 / len(train_dataloader), # Parameter for privacy accounting. Probability of not achieving privacy guarantees
+            #     target_epsilon=epsilon, 
+            #     epochs=epochs,
+            #     max_grad_norm=0.1,
+            # )
+            # print("222")
+            # optimizer = Adam(model.parameters(), lr=learning_rate)
+            
+            # optimizer= optim.SGD(model.parameters(),lr=learning_rate)
+            # privacy_engine = PrivacyEngine(
+            #     model,
+            #     sample_rate = batch_size/len(train_dataset),
+            #     noise_multiplier = 0.1,
+            #     max_grad_norm =1.0,
+            # )
+            # privacy_engine.attach(optimizer)
+            MAX_GRAD_NORM = 1.2
+            EPSILON = epsilon
+            DELTA = 1e-5
+            NUMWORKS=2
+            VIRTUAL_BATCH_SIZE = 64
+            N_ACCUMULATION_STEPS = int(VIRTUAL_BATCH_SIZE/batch_size)
+            model = module_modification.convert_batchnorm_modules(model)
+            privacy_engine = PrivacyEngine(
+                model,
+                sample_rate=N_ACCUMULATION_STEPS,
+                epochs = epoch,
+                target_epsilon = EPSILON,
+                target_delta = DELTA,
+                max_grad_norm=MAX_GRAD_NORM,
+            )
+            optimizer = optim.RMSprop(model.parameters(),lr=learning_rate)
+            privacy_engine.attach(optimizer)
+
+            device = self.device
+            model = model.to(device)
+            # training
+            for epoch in range(epochs):
+                start_time = time.time()
+                epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
+
+                model.train()
+                for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
+                    sample_size_train+=1
+                    model.train()
+                    optimizer.zero_grad()
+                    dp_optimizer.zero_grad()
+                    eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+                    loss, accuracy, _, _ = self.cal_loss(prediction,label)  
+                    loss.backward()
+                    dp_optimizer.step()
+                    optimizer.step()
+                    epoch_loss_train += loss.item()
+                    epoch_acc_train += accuracy.item()
+                    
+                prediction_all = []
+                label_all = []
+                model.eval()
+                with torch.no_grad():
+                    for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(test_dataloader):
+                        sample_size_test +=1
+                        eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+                        loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
+                        prediction_all.extend(pred_label_id.cpu().numpy())
+                        label_all.extend(label_id.cpu().numpy())
+                        epoch_loss_test += loss.item()
+                        epoch_acc_test += accuracy.item()
+
+                f1_score_epoch = f1_score(prediction_all,label_all)
+                end_time = time.time()
+                time_cost = end_time-start_time
+                current_datetime = datetime.now()
+                formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                record = f'''Epochs: {epoch + 1}
+                | Train Loss: {epoch_loss_train/sample_size_train: .3f}
+                | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
+                | Test Loss: {epoch_loss_test/sample_size_test: .3f}
+                | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
+                | f_1 Score: {f1_score_epoch: .3f}
+                | Time Cost: {time_cost: .1f}
+                | Record Time: {formatted_datetime} \n'''
+                print(record)
+                with open(whole_log_path, "a") as file:
+                    file.write(record)
+
+                if f1_score_epoch > f1_score_best:
+                    torch.save(model.state_dict(), save_model_path)
+                    f1_best_record = record
+                    f1_score_best = f1_score_epoch
+                    with open(best_log_path, "w") as file:
+                        file.write(f1_best_record)
 
 
 if __name__ == "__main__":
     set_seed(980616)
-    print("I'm running to for demo")
+    print("I'm running to for compare_DP_scheme")
     python_job = TrainAndTest()
-    train_type = "demo"
+    train_type = "compare_DP_scheme"
     multimodal_type = "ti"
-    dp_mode  ="lapacian_dropout"
+    dp_mode  ="DPSGD"
     eeg_model="bert"
     eeg_model_coef="bert-base-uncased"
     act_model="clip"
