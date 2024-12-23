@@ -7,9 +7,9 @@ from base_train import TrainAndTest
 compare:
     multimodal_type: "ti", "tt", "it", "ii"
 fix: 
-    txt_model: bert, txt_model_coef:"bert-base-uncased", 
-    img_model: clip, img_model_coef:"ViT-B/32", 
-    cross_atn_type: double_stream
+    txt_model: bert, txt_model_coef:"bert-base-uncased"
+    img_model: clip, img_model_coef:"ViT-B/32"
+    cross_modal_type: double_stream
     DP scheme: feature-level element-wise DP dropout
     privacy budget: epsilon = 0.1
 """

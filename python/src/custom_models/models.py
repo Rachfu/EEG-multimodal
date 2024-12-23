@@ -219,7 +219,6 @@ class IICA_LapDropout(nn.Module):
 
 class TISC_LapDropout(nn.Module):
     """
-    --- Our mainly proposed model in paper ---
     Ti: treat eeg as txt, act as img; ti means txt + img
     SC: single attention for cross modal feature
     LapDropout: proposed feature-level Laplacian dropout
@@ -233,8 +232,8 @@ class TISC_LapDropout(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.visual_encoder = nn.Linear(512, 768)
         bert_output_size = 768
-        self.multi_head_encoderlayer = TransformerEncoderLayer(d_model=bert_output_size)
-        self.multi_head_encoder = TransformerEncoder(self.multi_head_encoderlayer,num_layer=12)
+        self.multi_head_encoderlayer = TransformerEncoderLayer(d_model=bert_output_size, nhead=12)
+        self.multi_head_encoder = TransformerEncoder(self.multi_head_encoderlayer,num_layers=12)
         self.fc_layers = nn.Sequential(
             nn.Linear(3*768, 3*768),
             nn.ReLU(),
@@ -256,11 +255,8 @@ class TISC_LapDropout(nn.Module):
         eeg_txt_semantics_embedding_mean = eeg_txt_semantics_embedding.mean(dim=1).unsqueeze(1)
         concat_attn_embedding = torch.cat((eeg_txt_semantics_embedding_mean,act_img_embedding),dim=1)
         concat_attn_embedding = concat_attn_embedding.permute(1,0,2)
-        concat_attn_result =  self.multi_head_encoder(concat_attn_embedding)
-        print(concat_attn_result).shape
-        
-        # cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
-        feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
+        concat_attn_result = self.multi_head_encoder(concat_attn_embedding).mean(dim=0) # torch.Size([8, 768])
+        feature_concat = torch.cat((eeg_txt_feature, act_img_feature,concat_attn_result),dim=1)
         feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
         feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
         feature = (feature_concat - feature_min) / (feature_max - feature_min)
@@ -275,3 +271,45 @@ class TISC_LapDropout(nn.Module):
         prediction = self.classifier(feature)
         return prediction
 
+class TICA_DPSGD(nn.Module):
+    """
+    Ti: treat eeg as txt, act as img; ti means txt + img
+    CA: cross-attention for cross modal feature
+    DPSGD: DP achieved with perturbation on gradients
+    """
+    def __init__(self,bert_coef):
+        """
+        bert_coef: 
+        """
+        super().__init__()
+        self.bert = BertModel.from_pretrained(bert_coef)
+        self.visual_encoder = nn.Linear(512, 768)
+        bert_output_size = 768
+        self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
+        self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask):
+        eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
+                                                                 attention_mask=eeg_txt_mask,
+                                                                 return_dict=False) #768
+        act_img_embedding = self.visual_encoder(act_img_input)
+        act_img_feature = act_img_embedding.squeeze(1)
+        cross_attn_result = self.multi_head_decoder(tgt=act_img_embedding.permute(1,0,2), 
+                                                    memory=eeg_txt_semantics_embedding.permute(1,0,2),
+                                                    tgt_key_padding_mask=act_img_mask==0, 
+                                                    memory_key_padding_mask=eeg_txt_mask==0)
+        cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
+        feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
+        return prediction

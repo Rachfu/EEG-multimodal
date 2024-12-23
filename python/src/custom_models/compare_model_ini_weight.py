@@ -10,7 +10,7 @@ compare:
         resnet: resnet34
 fix:
     multimodal_type: "ti"
-    cross_atn_type: double_stream
+    cross_modal_type: double_stream
     DP scheme: feature-level element-wise DP dropout
     privacy budget: epsilon = 0.1
 """
