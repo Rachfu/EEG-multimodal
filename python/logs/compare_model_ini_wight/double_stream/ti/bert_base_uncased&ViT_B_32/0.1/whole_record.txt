@@ -1,473 +1,800 @@
 Epochs: 1
-            | Train Loss:  2.494
-            | Train Accuracy:  0.539
-            | Test Loss:  0.572
-            | Test Accuracy:  0.676
-            | f_1 Score:  0.812
-            | Time Cost:  35.9
-Epochs: 2
-            | Train Loss:  0.571
-            | Train Accuracy:  0.667
-            | Test Loss:  0.488
-            | Test Accuracy:  0.738
-            | f_1 Score:  0.833
-            | Time Cost:  35.7
-Epochs: 3
-            | Train Loss:  0.455
-            | Train Accuracy:  0.787
-            | Test Loss:  0.354
-            | Test Accuracy:  0.862
-            | f_1 Score:  0.889
-            | Time Cost:  35.7
-Epochs: 4
-            | Train Loss:  0.328
-            | Train Accuracy:  0.887
-            | Test Loss:  0.295
-            | Test Accuracy:  0.875
-            | f_1 Score:  0.899
-            | Time Cost:  35.9
-Epochs: 5
-            | Train Loss:  0.261
-            | Train Accuracy:  0.914
-            | Test Loss:  0.211
-            | Test Accuracy:  0.929
-            | f_1 Score:  0.946
-            | Time Cost:  35.8
-Epochs: 6
-            | Train Loss:  0.223
-            | Train Accuracy:  0.929
-            | Test Loss:  0.162
-            | Test Accuracy:  0.951
-            | f_1 Score:  0.963
-            | Time Cost:  35.8
-Epochs: 7
-            | Train Loss:  0.189
-            | Train Accuracy:  0.940
-            | Test Loss:  0.124
-            | Test Accuracy:  0.956
-            | f_1 Score:  0.967
-            | Time Cost:  35.8
-Epochs: 8
-            | Train Loss:  0.145
-            | Train Accuracy:  0.959
-            | Test Loss:  0.096
-            | Test Accuracy:  0.965
-            | f_1 Score:  0.975
-            | Time Cost:  35.7
-Epochs: 9
-            | Train Loss:  0.132
-            | Train Accuracy:  0.961
-            | Test Loss:  0.081
-            | Test Accuracy:  0.972
-            | f_1 Score:  0.979
-            | Time Cost:  35.8
-Epochs: 10
-            | Train Loss:  0.111
-            | Train Accuracy:  0.967
-            | Test Loss:  0.080
-            | Test Accuracy:  0.979
-            | f_1 Score:  0.984
-            | Time Cost:  35.8
-Epochs: 11
-            | Train Loss:  0.103
-            | Train Accuracy:  0.972
-            | Test Loss:  0.059
-            | Test Accuracy:  0.987
-            | f_1 Score:  0.990
-            | Time Cost:  35.9
-Epochs: 12
-            | Train Loss:  0.087
-            | Train Accuracy:  0.975
-            | Test Loss:  0.052
-            | Test Accuracy:  0.985
-            | f_1 Score:  0.989
-            | Time Cost:  35.7
-Epochs: 13
-            | Train Loss:  0.071
-            | Train Accuracy:  0.982
-            | Test Loss:  0.054
-            | Test Accuracy:  0.984
-            | f_1 Score:  0.988
-            | Time Cost:  35.8
-Epochs: 14
-            | Train Loss:  0.069
-            | Train Accuracy:  0.982
-            | Test Loss:  0.046
-            | Test Accuracy:  0.985
-            | f_1 Score:  0.989
-            | Time Cost:  35.8
-Epochs: 15
-            | Train Loss:  0.062
-            | Train Accuracy:  0.982
-            | Test Loss:  0.043
-            | Test Accuracy:  0.985
-            | f_1 Score:  0.989
-            | Time Cost:  35.8
-Epochs: 16
-            | Train Loss:  0.051
-            | Train Accuracy:  0.988
-            | Test Loss:  0.056
-            | Test Accuracy:  0.982
-            | f_1 Score:  0.987
-            | Time Cost:  35.8
-Epochs: 17
-            | Train Loss:  0.051
-            | Train Accuracy:  0.988
-            | Test Loss:  0.049
-            | Test Accuracy:  0.987
-            | f_1 Score:  0.990
-            | Time Cost:  35.7
-Epochs: 18
-            | Train Loss:  0.044
-            | Train Accuracy:  0.992
-            | Test Loss:  0.090
-            | Test Accuracy:  0.972
-            | f_1 Score:  0.988
-            | Time Cost:  35.7
-Epochs: 19
-            | Train Loss:  0.045
-            | Train Accuracy:  0.990
-            | Test Loss:  0.047
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.7
-Epochs: 20
-            | Train Loss:  0.039
-            | Train Accuracy:  0.990
-            | Test Loss:  0.044
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.8
-Epochs: 21
-            | Train Loss:  0.034
-            | Train Accuracy:  0.994
-            | Test Loss:  0.044
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.9
-Epochs: 22
-            | Train Loss:  0.040
-            | Train Accuracy:  0.990
-            | Test Loss:  0.046
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.8
-Epochs: 23
-            | Train Loss:  0.039
-            | Train Accuracy:  0.989
-            | Test Loss:  0.032
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.9
-Epochs: 24
-            | Train Loss:  0.035
-            | Train Accuracy:  0.992
-            | Test Loss:  0.030
-            | Test Accuracy:  0.992
-            | f_1 Score:  0.994
-            | Time Cost:  35.8
-Epochs: 25
-            | Train Loss:  0.028
-            | Train Accuracy:  0.995
-            | Test Loss:  0.041
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.8
-Epochs: 26
-            | Train Loss:  0.022
-            | Train Accuracy:  0.995
-            | Test Loss:  0.047
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.8
-Epochs: 27
-            | Train Loss:  0.025
-            | Train Accuracy:  0.995
-            | Test Loss:  0.050
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.7
-Epochs: 28
-            | Train Loss:  0.021
-            | Train Accuracy:  0.995
-            | Test Loss:  0.045
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.7
-Epochs: 29
-            | Train Loss:  0.032
-            | Train Accuracy:  0.992
-            | Test Loss:  0.040
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.7
-Epochs: 30
-            | Train Loss:  0.019
-            | Train Accuracy:  0.998
-            | Test Loss:  0.038
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.7
-Epochs: 31
-            | Train Loss:  0.023
-            | Train Accuracy:  0.995
-            | Test Loss:  0.044
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.8
-Epochs: 32
-            | Train Loss:  0.019
-            | Train Accuracy:  0.997
-            | Test Loss:  0.033
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.7
-Epochs: 33
-            | Train Loss:  0.021
-            | Train Accuracy:  0.995
-            | Test Loss:  0.035
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.8
-Epochs: 34
-            | Train Loss:  0.019
-            | Train Accuracy:  0.996
-            | Test Loss:  0.033
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.7
-Epochs: 35
-            | Train Loss:  0.027
-            | Train Accuracy:  0.994
-            | Test Loss:  0.035
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.8
-Epochs: 36
-            | Train Loss:  0.017
-            | Train Accuracy:  0.996
-            | Test Loss:  0.035
-            | Test Accuracy:  0.995
-            | f_1 Score:  0.996
-            | Time Cost:  35.7
-Epochs: 37
-            | Train Loss:  0.015
-            | Train Accuracy:  0.998
-            | Test Loss:  0.041
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.8
-Epochs: 38
-            | Train Loss:  0.016
-            | Train Accuracy:  0.997
-            | Test Loss:  0.032
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.7
-Epochs: 39
-            | Train Loss:  0.016
-            | Train Accuracy:  0.997
-            | Test Loss:  0.047
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.7
-Epochs: 40
-            | Train Loss:  0.020
-            | Train Accuracy:  0.995
-            | Test Loss:  0.053
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.7
-Epochs: 41
-            | Train Loss:  0.020
-            | Train Accuracy:  0.995
-            | Test Loss:  0.066
-            | Test Accuracy:  0.979
-            | f_1 Score:  0.993
-            | Time Cost:  35.7
-Epochs: 42
-            | Train Loss:  0.017
-            | Train Accuracy:  0.996
-            | Test Loss:  0.040
-            | Test Accuracy:  0.992
-            | f_1 Score:  0.994
-            | Time Cost:  35.7
-Epochs: 43
-            | Train Loss:  0.022
-            | Train Accuracy:  0.995
-            | Test Loss:  0.053
-            | Test Accuracy:  0.988
-            | f_1 Score:  0.991
-            | Time Cost:  35.8
-Epochs: 44
-            | Train Loss:  0.017
-            | Train Accuracy:  0.997
-            | Test Loss:  0.034
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.8
-Epochs: 45
-            | Train Loss:  0.016
-            | Train Accuracy:  0.997
-            | Test Loss:  0.047
-            | Test Accuracy:  0.990
-            | f_1 Score:  0.993
-            | Time Cost:  35.8
-Epochs: 46
-            | Train Loss:  0.013
-            | Train Accuracy:  0.997
-            | Test Loss:  0.043
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.8
-Epochs: 47
-            | Train Loss:  0.015
-            | Train Accuracy:  0.997
-            | Test Loss:  0.034
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.8
-Epochs: 48
-            | Train Loss:  0.014
-            | Train Accuracy:  0.997
-            | Test Loss:  0.029
-            | Test Accuracy:  0.995
-            | f_1 Score:  0.996
-            | Time Cost:  35.8
-Epochs: 49
-            | Train Loss:  0.011
-            | Train Accuracy:  0.998
-            | Test Loss:  0.036
-            | Test Accuracy:  0.992
-            | f_1 Score:  0.994
-            | Time Cost:  35.8
-Epochs: 50
-            | Train Loss:  0.012
-            | Train Accuracy:  0.998
-            | Test Loss:  0.037
-            | Test Accuracy:  0.993
-            | f_1 Score:  0.995
-            | Time Cost:  35.7
-Epochs: 1
             | Train Loss:  0.693
             | Train Accuracy:  0.583
             | Test Loss:  0.646
-            | Test Accuracy:  0.674
-            | f_1 Score:  0.792
-            | Time Cost:  79.0
+            | Test Accuracy:  0.678
+            | f_1 Score:  0.794
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:12:31 
 Epochs: 2
             | Train Loss:  0.666
             | Train Accuracy:  0.627
             | Test Loss:  0.640
-            | Test Accuracy:  0.661
-            | f_1 Score:  0.787
-            | Time Cost:  78.6
-Epochs: 3
-            | Train Loss:  0.667
-            | Train Accuracy:  0.640
-            | Test Loss:  0.614
-            | Test Accuracy:  0.684
-            | f_1 Score:  0.803
-            | Time Cost:  78.6
-Epochs: 4
-            | Train Loss:  0.632
-            | Train Accuracy:  0.659
-            | Test Loss:  0.611
-            | Test Accuracy:  0.678
-            | f_1 Score:  0.801
-            | Time Cost:  78.3
-Epochs: 5
-            | Train Loss:  0.610
-            | Train Accuracy:  0.671
-            | Test Loss:  0.564
-            | Test Accuracy:  0.714
-            | f_1 Score:  0.826
-            | Time Cost:  78.6
-Epochs: 1
-            | Train Loss:  0.693
-            | Train Accuracy:  0.583
-            | Test Loss:  0.646
-            | Test Accuracy:  0.678
-            | f_1 Score:  0.794
-            | Time Cost:  78.6
-            | Record Time: 2024-12-23 01:00:27 
-Epochs: 1
-            | Train Loss:  0.693
-            | Train Accuracy:  0.583
-            | Test Loss:  0.646
-            | Test Accuracy:  0.678
-            | f_1 Score:  0.794
-            | Time Cost:  67.4
-            | Record Time: 2024-12-23 01:01:16 
-Epochs: 2
-            | Train Loss:  0.666
-            | Train Accuracy:  0.628
-            | Test Loss:  0.639
-            | Test Accuracy:  0.661
-            | f_1 Score:  0.787
-            | Time Cost:  78.3
-            | Record Time: 2024-12-23 01:01:49 
-Epochs: 2
-            | Train Loss:  0.666
-            | Train Accuracy:  0.628
-            | Test Loss:  0.640
             | Test Accuracy:  0.663
             | f_1 Score:  0.788
-            | Time Cost:  67.0
-            | Record Time: 2024-12-23 01:02:27 
-Epochs: 3
-            | Train Loss:  0.666
-            | Train Accuracy:  0.640
-            | Test Loss:  0.612
-            | Test Accuracy:  0.689
-            | f_1 Score:  0.807
-            | Time Cost:  78.4
-            | Record Time: 2024-12-23 01:03:07 
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:13:42 
 Epochs: 3
             | Train Loss:  0.666
             | Train Accuracy:  0.641
             | Test Loss:  0.612
+            | Test Accuracy:  0.688
+            | f_1 Score:  0.805
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:14:50 
+Epochs: 4
+            | Train Loss:  0.631
+            | Train Accuracy:  0.660
+            | Test Loss:  0.612
+            | Test Accuracy:  0.679
+            | f_1 Score:  0.801
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 01:16:01 
+Epochs: 5
+            | Train Loss:  0.608
+            | Train Accuracy:  0.674
+            | Test Loss:  0.562
+            | Test Accuracy:  0.712
+            | f_1 Score:  0.825
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:17:08 
+Epochs: 6
+            | Train Loss:  0.589
+            | Train Accuracy:  0.685
+            | Test Loss:  0.542
+            | Test Accuracy:  0.701
+            | f_1 Score:  0.818
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:18:19 
+Epochs: 7
+            | Train Loss:  0.565
+            | Train Accuracy:  0.696
+            | Test Loss:  0.505
+            | Test Accuracy:  0.758
+            | f_1 Score:  0.843
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:19:26 
+Epochs: 8
+            | Train Loss:  0.543
+            | Train Accuracy:  0.720
+            | Test Loss:  0.492
+            | Test Accuracy:  0.789
+            | f_1 Score:  0.859
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:20:37 
+Epochs: 9
+            | Train Loss:  0.529
+            | Train Accuracy:  0.731
+            | Test Loss:  0.483
+            | Test Accuracy:  0.783
+            | f_1 Score:  0.852
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:21:47 
+Epochs: 10
+            | Train Loss:  0.518
+            | Train Accuracy:  0.755
+            | Test Loss:  0.452
+            | Test Accuracy:  0.796
+            | f_1 Score:  0.869
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:22:54 
+Epochs: 11
+            | Train Loss:  0.500
+            | Train Accuracy:  0.764
+            | Test Loss:  0.431
+            | Test Accuracy:  0.804
+            | f_1 Score:  0.874
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 01:24:05 
+Epochs: 12
+            | Train Loss:  0.485
+            | Train Accuracy:  0.772
+            | Test Loss:  0.422
+            | Test Accuracy:  0.819
+            | f_1 Score:  0.882
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:25:16 
+Epochs: 13
+            | Train Loss:  0.465
+            | Train Accuracy:  0.792
+            | Test Loss:  0.389
+            | Test Accuracy:  0.832
+            | f_1 Score:  0.885
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:26:27 
+Epochs: 14
+            | Train Loss:  0.444
+            | Train Accuracy:  0.805
+            | Test Loss:  0.384
+            | Test Accuracy:  0.870
+            | f_1 Score:  0.909
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 01:27:37 
+Epochs: 15
+            | Train Loss:  0.444
+            | Train Accuracy:  0.812
+            | Test Loss:  0.374
+            | Test Accuracy:  0.865
+            | f_1 Score:  0.906
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 01:28:50 
+Epochs: 16
+            | Train Loss:  0.426
+            | Train Accuracy:  0.837
+            | Test Loss:  0.369
+            | Test Accuracy:  0.844
+            | f_1 Score:  0.889
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:29:57 
+Epochs: 17
+            | Train Loss:  0.401
+            | Train Accuracy:  0.852
+            | Test Loss:  0.349
+            | Test Accuracy:  0.901
+            | f_1 Score:  0.930
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:31:04 
+Epochs: 18
+            | Train Loss:  0.404
+            | Train Accuracy:  0.848
+            | Test Loss:  0.328
+            | Test Accuracy:  0.888
+            | f_1 Score:  0.920
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:32:15 
+Epochs: 19
+            | Train Loss:  0.377
+            | Train Accuracy:  0.859
+            | Test Loss:  0.311
+            | Test Accuracy:  0.914
+            | f_1 Score:  0.938
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:33:22 
+Epochs: 20
+            | Train Loss:  0.368
+            | Train Accuracy:  0.879
+            | Test Loss:  0.306
+            | Test Accuracy:  0.910
+            | f_1 Score:  0.936
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:34:33 
+Epochs: 21
+            | Train Loss:  0.360
+            | Train Accuracy:  0.870
+            | Test Loss:  0.293
+            | Test Accuracy:  0.934
+            | f_1 Score:  0.952
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:35:40 
+Epochs: 22
+            | Train Loss:  0.345
+            | Train Accuracy:  0.890
+            | Test Loss:  0.316
+            | Test Accuracy:  0.911
+            | f_1 Score:  0.937
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:36:51 
+Epochs: 23
+            | Train Loss:  0.335
+            | Train Accuracy:  0.884
+            | Test Loss:  0.292
+            | Test Accuracy:  0.910
+            | f_1 Score:  0.934
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:37:58 
+Epochs: 24
+            | Train Loss:  0.331
+            | Train Accuracy:  0.894
+            | Test Loss:  0.250
+            | Test Accuracy:  0.933
+            | f_1 Score:  0.951
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 01:39:06 
+Epochs: 25
+            | Train Loss:  0.305
+            | Train Accuracy:  0.909
+            | Test Loss:  0.257
+            | Test Accuracy:  0.934
+            | f_1 Score:  0.953
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:40:13 
+Epochs: 26
+            | Train Loss:  0.296
+            | Train Accuracy:  0.909
+            | Test Loss:  0.257
+            | Test Accuracy:  0.918
+            | f_1 Score:  0.948
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 01:41:24 
+Epochs: 27
+            | Train Loss:  0.290
+            | Train Accuracy:  0.918
+            | Test Loss:  0.225
+            | Test Accuracy:  0.941
+            | f_1 Score:  0.957
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:42:31 
+Epochs: 28
+            | Train Loss:  0.287
+            | Train Accuracy:  0.918
+            | Test Loss:  0.211
+            | Test Accuracy:  0.946
+            | f_1 Score:  0.960
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:43:42 
+Epochs: 29
+            | Train Loss:  0.266
+            | Train Accuracy:  0.926
+            | Test Loss:  0.199
+            | Test Accuracy:  0.956
+            | f_1 Score:  0.967
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:44:53 
+Epochs: 30
+            | Train Loss:  0.264
+            | Train Accuracy:  0.931
+            | Test Loss:  0.232
+            | Test Accuracy:  0.942
+            | f_1 Score:  0.959
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:46:04 
+Epochs: 31
+            | Train Loss:  0.258
+            | Train Accuracy:  0.922
+            | Test Loss:  0.196
+            | Test Accuracy:  0.957
+            | f_1 Score:  0.969
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:47:11 
+Epochs: 32
+            | Train Loss:  0.246
+            | Train Accuracy:  0.928
+            | Test Loss:  0.208
+            | Test Accuracy:  0.952
+            | f_1 Score:  0.966
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:48:22 
+Epochs: 33
+            | Train Loss:  0.240
+            | Train Accuracy:  0.931
+            | Test Loss:  0.165
+            | Test Accuracy:  0.964
+            | f_1 Score:  0.973
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 01:49:29 
+Epochs: 34
+            | Train Loss:  0.231
+            | Train Accuracy:  0.933
+            | Test Loss:  0.193
+            | Test Accuracy:  0.961
+            | f_1 Score:  0.971
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:50:41 
+Epochs: 35
+            | Train Loss:  0.224
+            | Train Accuracy:  0.939
+            | Test Loss:  0.156
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:51:48 
+Epochs: 36
+            | Train Loss:  0.228
+            | Train Accuracy:  0.936
+            | Test Loss:  0.166
+            | Test Accuracy:  0.951
+            | f_1 Score:  0.964
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 01:53:00 
+Epochs: 37
+            | Train Loss:  0.197
+            | Train Accuracy:  0.946
+            | Test Loss:  0.167
+            | Test Accuracy:  0.965
+            | f_1 Score:  0.975
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 01:54:07 
+Epochs: 38
+            | Train Loss:  0.215
+            | Train Accuracy:  0.938
+            | Test Loss:  0.177
+            | Test Accuracy:  0.951
+            | f_1 Score:  0.964
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:55:15 
+Epochs: 39
+            | Train Loss:  0.196
+            | Train Accuracy:  0.941
+            | Test Loss:  0.146
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:56:22 
+Epochs: 40
+            | Train Loss:  0.189
+            | Train Accuracy:  0.944
+            | Test Loss:  0.155
+            | Test Accuracy:  0.964
+            | f_1 Score:  0.974
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:57:29 
+Epochs: 41
+            | Train Loss:  0.186
+            | Train Accuracy:  0.945
+            | Test Loss:  0.151
+            | Test Accuracy:  0.972
+            | f_1 Score:  0.979
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:58:37 
+Epochs: 42
+            | Train Loss:  0.177
+            | Train Accuracy:  0.954
+            | Test Loss:  0.148
+            | Test Accuracy:  0.961
+            | f_1 Score:  0.971
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 01:59:49 
+Epochs: 43
+            | Train Loss:  0.178
+            | Train Accuracy:  0.949
+            | Test Loss:  0.133
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 02:00:56 
+Epochs: 44
+            | Train Loss:  0.170
+            | Train Accuracy:  0.953
+            | Test Loss:  0.134
+            | Test Accuracy:  0.957
+            | f_1 Score:  0.969
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 02:02:03 
+Epochs: 45
+            | Train Loss:  0.159
+            | Train Accuracy:  0.958
+            | Test Loss:  0.118
+            | Test Accuracy:  0.975
+            | f_1 Score:  0.982
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 02:03:11 
+Epochs: 46
+            | Train Loss:  0.150
+            | Train Accuracy:  0.961
+            | Test Loss:  0.105
+            | Test Accuracy:  0.975
+            | f_1 Score:  0.982
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 02:04:22 
+Epochs: 47
+            | Train Loss:  0.159
+            | Train Accuracy:  0.955
+            | Test Loss:  0.130
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 02:05:29 
+Epochs: 48
+            | Train Loss:  0.169
+            | Train Accuracy:  0.954
+            | Test Loss:  0.130
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 02:06:36 
+Epochs: 49
+            | Train Loss:  0.154
+            | Train Accuracy:  0.960
+            | Test Loss:  0.124
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 02:07:44 
+Epochs: 50
+            | Train Loss:  0.151
+            | Train Accuracy:  0.958
+            | Test Loss:  0.129
+            | Test Accuracy:  0.972
+            | f_1 Score:  0.979
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 02:08:51 
+Epochs: 1
+            | Train Loss:  0.693
+            | Train Accuracy:  0.583
+            | Test Loss:  0.646
+            | Test Accuracy:  0.678
+            | f_1 Score:  0.794
+            | Time Cost:  67.5
+            | Record Time: 2024-12-23 07:27:06 
+Epochs: 2
+            | Train Loss:  0.666
+            | Train Accuracy:  0.627
+            | Test Loss:  0.639
+            | Test Accuracy:  0.661
+            | f_1 Score:  0.787
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 07:28:16 
+Epochs: 3
+            | Train Loss:  0.667
+            | Train Accuracy:  0.640
+            | Test Loss:  0.612
             | Test Accuracy:  0.689
             | f_1 Score:  0.807
             | Time Cost:  67.4
-            | Record Time: 2024-12-23 01:03:35 
+            | Record Time: 2024-12-23 07:29:24 
 Epochs: 4
             | Train Loss:  0.631
             | Train Accuracy:  0.660
             | Test Loss:  0.607
             | Test Accuracy:  0.684
             | f_1 Score:  0.805
-            | Time Cost:  67.5
-            | Record Time: 2024-12-23 01:04:46 
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:30:35 
 Epochs: 5
             | Train Loss:  0.608
-            | Train Accuracy:  0.674
-            | Test Loss:  0.561
-            | Test Accuracy:  0.717
-            | f_1 Score:  0.829
-            | Time Cost:  67.4
-            | Record Time: 2024-12-23 01:05:53 
+            | Train Accuracy:  0.673
+            | Test Loss:  0.562
+            | Test Accuracy:  0.715
+            | f_1 Score:  0.827
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:31:42 
 Epochs: 6
             | Train Loss:  0.588
-            | Train Accuracy:  0.684
-            | Test Loss:  0.547
-            | Test Accuracy:  0.696
-            | f_1 Score:  0.815
+            | Train Accuracy:  0.686
+            | Test Loss:  0.542
+            | Test Accuracy:  0.701
+            | f_1 Score:  0.819
             | Time Cost:  67.3
-            | Record Time: 2024-12-23 01:07:05 
+            | Record Time: 2024-12-23 07:32:53 
 Epochs: 7
             | Train Loss:  0.566
             | Train Accuracy:  0.696
-            | Test Loss:  0.508
-            | Test Accuracy:  0.750
-            | f_1 Score:  0.846
-            | Time Cost:  67.2
-            | Record Time: 2024-12-23 01:08:12 
+            | Test Loss:  0.502
+            | Test Accuracy:  0.752
+            | f_1 Score:  0.847
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:34:01 
 Epochs: 8
-            | Train Loss:  0.543
-            | Train Accuracy:  0.719
-            | Test Loss:  0.496
-            | Test Accuracy:  0.785
-            | f_1 Score:  0.855
+            | Train Loss:  0.541
+            | Train Accuracy:  0.725
+            | Test Loss:  0.492
+            | Test Accuracy:  0.788
+            | f_1 Score:  0.857
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:35:11 
+Epochs: 9
+            | Train Loss:  0.529
+            | Train Accuracy:  0.728
+            | Test Loss:  0.473
+            | Test Accuracy:  0.786
+            | f_1 Score:  0.856
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:36:22 
+Epochs: 10
+            | Train Loss:  0.517
+            | Train Accuracy:  0.755
+            | Test Loss:  0.444
+            | Test Accuracy:  0.801
+            | f_1 Score:  0.873
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 07:37:30 
+Epochs: 11
+            | Train Loss:  0.501
+            | Train Accuracy:  0.761
+            | Test Loss:  0.428
+            | Test Accuracy:  0.811
+            | f_1 Score:  0.879
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:38:41 
+Epochs: 12
+            | Train Loss:  0.486
+            | Train Accuracy:  0.772
+            | Test Loss:  0.416
+            | Test Accuracy:  0.824
+            | f_1 Score:  0.887
             | Time Cost:  67.2
-            | Record Time: 2024-12-23 01:09:24 
+            | Record Time: 2024-12-23 07:39:51 
+Epochs: 13
+            | Train Loss:  0.467
+            | Train Accuracy:  0.795
+            | Test Loss:  0.387
+            | Test Accuracy:  0.842
+            | f_1 Score:  0.891
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 07:41:02 
+Epochs: 14
+            | Train Loss:  0.446
+            | Train Accuracy:  0.804
+            | Test Loss:  0.384
+            | Test Accuracy:  0.860
+            | f_1 Score:  0.902
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:42:13 
+Epochs: 15
+            | Train Loss:  0.442
+            | Train Accuracy:  0.816
+            | Test Loss:  0.383
+            | Test Accuracy:  0.862
+            | f_1 Score:  0.904
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 07:43:24 
+Epochs: 16
+            | Train Loss:  0.432
+            | Train Accuracy:  0.833
+            | Test Loss:  0.372
+            | Test Accuracy:  0.850
+            | f_1 Score:  0.894
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:44:35 
+Epochs: 17
+            | Train Loss:  0.402
+            | Train Accuracy:  0.851
+            | Test Loss:  0.351
+            | Test Accuracy:  0.901
+            | f_1 Score:  0.929
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:45:42 
+Epochs: 18
+            | Train Loss:  0.400
+            | Train Accuracy:  0.846
+            | Test Loss:  0.328
+            | Test Accuracy:  0.887
+            | f_1 Score:  0.920
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 07:46:53 
+Epochs: 19
+            | Train Loss:  0.382
+            | Train Accuracy:  0.857
+            | Test Loss:  0.316
+            | Test Accuracy:  0.921
+            | f_1 Score:  0.943
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:48:00 
+Epochs: 20
+            | Train Loss:  0.373
+            | Train Accuracy:  0.869
+            | Test Loss:  0.306
+            | Test Accuracy:  0.901
+            | f_1 Score:  0.929
+            | Time Cost:  67.5
+            | Record Time: 2024-12-23 07:49:11 
+Epochs: 21
+            | Train Loss:  0.362
+            | Train Accuracy:  0.866
+            | Test Loss:  0.296
+            | Test Accuracy:  0.933
+            | f_1 Score:  0.951
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:50:18 
+Epochs: 22
+            | Train Loss:  0.348
+            | Train Accuracy:  0.892
+            | Test Loss:  0.288
+            | Test Accuracy:  0.924
+            | f_1 Score:  0.946
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:51:29 
+Epochs: 23
+            | Train Loss:  0.334
+            | Train Accuracy:  0.885
+            | Test Loss:  0.287
+            | Test Accuracy:  0.916
+            | f_1 Score:  0.939
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:52:37 
+Epochs: 24
+            | Train Loss:  0.326
+            | Train Accuracy:  0.898
+            | Test Loss:  0.251
+            | Test Accuracy:  0.934
+            | f_1 Score:  0.953
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 07:53:44 
+Epochs: 25
+            | Train Loss:  0.295
+            | Train Accuracy:  0.914
+            | Test Loss:  0.259
+            | Test Accuracy:  0.936
+            | f_1 Score:  0.954
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 07:54:55 
+Epochs: 26
+            | Train Loss:  0.299
+            | Train Accuracy:  0.905
+            | Test Loss:  0.243
+            | Test Accuracy:  0.928
+            | f_1 Score:  0.956
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 07:56:06 
+Epochs: 27
+            | Train Loss:  0.285
+            | Train Accuracy:  0.920
+            | Test Loss:  0.219
+            | Test Accuracy:  0.944
+            | f_1 Score:  0.959
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:57:17 
+Epochs: 28
+            | Train Loss:  0.279
+            | Train Accuracy:  0.926
+            | Test Loss:  0.210
+            | Test Accuracy:  0.949
+            | f_1 Score:  0.962
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 07:58:28 
+Epochs: 29
+            | Train Loss:  0.263
+            | Train Accuracy:  0.926
+            | Test Loss:  0.197
+            | Test Accuracy:  0.959
+            | f_1 Score:  0.970
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 07:59:38 
+Epochs: 30
+            | Train Loss:  0.263
+            | Train Accuracy:  0.930
+            | Test Loss:  0.194
+            | Test Accuracy:  0.952
+            | f_1 Score:  0.965
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:00:49 
+Epochs: 31
+            | Train Loss:  0.250
+            | Train Accuracy:  0.928
+            | Test Loss:  0.199
+            | Test Accuracy:  0.957
+            | f_1 Score:  0.969
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:01:56 
+Epochs: 32
+            | Train Loss:  0.242
+            | Train Accuracy:  0.929
+            | Test Loss:  0.172
+            | Test Accuracy:  0.962
+            | f_1 Score:  0.972
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:03:03 
+Epochs: 33
+            | Train Loss:  0.234
+            | Train Accuracy:  0.934
+            | Test Loss:  0.166
+            | Test Accuracy:  0.965
+            | f_1 Score:  0.975
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:04:14 
+Epochs: 34
+            | Train Loss:  0.228
+            | Train Accuracy:  0.934
+            | Test Loss:  0.185
+            | Test Accuracy:  0.965
+            | f_1 Score:  0.975
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 08:05:24 
+Epochs: 35
+            | Train Loss:  0.215
+            | Train Accuracy:  0.941
+            | Test Loss:  0.164
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 08:06:32 
+Epochs: 36
+            | Train Loss:  0.227
+            | Train Accuracy:  0.934
+            | Test Loss:  0.160
+            | Test Accuracy:  0.956
+            | f_1 Score:  0.967
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:07:42 
+Epochs: 37
+            | Train Loss:  0.199
+            | Train Accuracy:  0.945
+            | Test Loss:  0.161
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:08:50 
+Epochs: 38
+            | Train Loss:  0.203
+            | Train Accuracy:  0.944
+            | Test Loss:  0.160
+            | Test Accuracy:  0.959
+            | f_1 Score:  0.970
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:09:57 
+Epochs: 39
+            | Train Loss:  0.189
+            | Train Accuracy:  0.946
+            | Test Loss:  0.143
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 08:11:05 
+Epochs: 40
+            | Train Loss:  0.189
+            | Train Accuracy:  0.946
+            | Test Loss:  0.148
+            | Test Accuracy:  0.959
+            | f_1 Score:  0.970
+            | Time Cost:  67.1
+            | Record Time: 2024-12-23 08:12:12 
+Epochs: 41
+            | Train Loss:  0.180
+            | Train Accuracy:  0.947
+            | Test Loss:  0.153
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:13:19 
+Epochs: 42
+            | Train Loss:  0.168
+            | Train Accuracy:  0.958
+            | Test Loss:  0.137
+            | Test Accuracy:  0.969
+            | f_1 Score:  0.977
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:14:26 
+Epochs: 43
+            | Train Loss:  0.184
+            | Train Accuracy:  0.946
+            | Test Loss:  0.130
+            | Test Accuracy:  0.964
+            | f_1 Score:  0.973
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:15:37 
+Epochs: 44
+            | Train Loss:  0.170
+            | Train Accuracy:  0.953
+            | Test Loss:  0.124
+            | Test Accuracy:  0.967
+            | f_1 Score:  0.976
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:16:44 
+Epochs: 45
+            | Train Loss:  0.162
+            | Train Accuracy:  0.958
+            | Test Loss:  0.113
+            | Test Accuracy:  0.975
+            | f_1 Score:  0.982
+            | Time Cost:  67.4
+            | Record Time: 2024-12-23 08:17:52 
+Epochs: 46
+            | Train Loss:  0.152
+            | Train Accuracy:  0.961
+            | Test Loss:  0.094
+            | Test Accuracy:  0.980
+            | f_1 Score:  0.985
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:19:03 
+Epochs: 47
+            | Train Loss:  0.164
+            | Train Accuracy:  0.954
+            | Test Loss:  0.123
+            | Test Accuracy:  0.970
+            | f_1 Score:  0.978
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:20:14 
+Epochs: 48
+            | Train Loss:  0.154
+            | Train Accuracy:  0.961
+            | Test Loss:  0.126
+            | Test Accuracy:  0.970
+            | f_1 Score:  0.978
+            | Time Cost:  67.2
+            | Record Time: 2024-12-23 08:21:21 
+Epochs: 49
+            | Train Loss:  0.155
+            | Train Accuracy:  0.962
+            | Test Loss:  0.122
+            | Test Accuracy:  0.972
+            | f_1 Score:  0.979
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 08:22:28 
+Epochs: 50
+            | Train Loss:  0.139
+            | Train Accuracy:  0.962
+            | Test Loss:  0.126
+            | Test Accuracy:  0.972
+            | f_1 Score:  0.979
+            | Time Cost:  67.3
+            | Record Time: 2024-12-23 08:23:35 

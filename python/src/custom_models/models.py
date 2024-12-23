@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.nn import TransformerDecoder, TransformerDecoderLayer
+from torch.nn import TransformerDecoder, TransformerDecoderLayer,TransformerEncoder,TransformerEncoderLayer
 from transformers import BertModel
 from tqdm import tqdm
 import warnings
@@ -25,10 +25,18 @@ def set_seed(seed):
 
 set_seed(980616)
 
-class DoubleStream_ti(nn.Module):
-    def __init__(self,dp_mode,bert_coef):
+class TICA_LapDropout(nn.Module):
+    """
+    --- Our mainly proposed model in paper ---
+    Ti: treat eeg as txt, act as img; ti means txt + img
+    CA: cross-attention for cross modal feature
+    LapDropout: proposed feature-level Laplacian dropout
+    """
+    def __init__(self,bert_coef):
+        """
+        bert_coef: 
+        """
         super().__init__()
-        self.dp_mode = dp_mode
         self.bert = BertModel.from_pretrained(bert_coef)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.visual_encoder = nn.Linear(512, 768)
@@ -59,25 +67,23 @@ class DoubleStream_ti(nn.Module):
                                                     memory_key_padding_mask=eeg_txt_mask==0)
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
-        if self.dp_mode == 'dropout_laplacian':
-            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            feature = (feature_concat - feature_min) / (feature_max - feature_min)
-            w = F.sigmoid(self.DP)
-            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
-            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
-            feature = feature + noise * eps_hat
-            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
-                                    hard=hard, dim=0)
-            feature = (feature * mask).sum(0)
-            feature = self.fc_layers(feature)
-            prediction = self.classifier(feature)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
         return prediction
 
-class DoubleStream_tt(nn.Module):
-    def __init__(self,dp_mode,bert_coef):
+class TTCA_LapDropout(nn.Module):
+    def __init__(self,bert_coef):
         super().__init__()
-        self.dp_mode = dp_mode
         self.bert = BertModel.from_pretrained(bert_coef)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         bert_output_size = 768
@@ -107,25 +113,23 @@ class DoubleStream_tt(nn.Module):
                                                     memory=eeg_txt_semantics_embedding.permute(1,0,2))
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_txt_feature, act_txt_feature,cross_attn_result),dim=1)
-        if self.dp_mode == 'dropout_laplacian':
-            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            feature = (feature_concat - feature_min) / (feature_max - feature_min)
-            w = F.sigmoid(self.DP)
-            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
-            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
-            feature = feature + noise * eps_hat
-            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
-                                    hard=hard, dim=0)
-            feature = (feature * mask).sum(0)
-            feature = self.fc_layers(feature)
-            prediction = self.classifier(feature)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
         return prediction
 
-class DoubleStream_it(nn.Module):
-    def __init__(self,dp_mode,bert_coef):
+class ITCA_LapDropout(nn.Module):
+    def __init__(self,bert_coef):
         super().__init__()
-        self.dp_mode = dp_mode
         self.bert = BertModel.from_pretrained(bert_coef)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.visual_encoder = nn.Linear(512, 768)
@@ -156,25 +160,23 @@ class DoubleStream_it(nn.Module):
                                                     memory_key_padding_mask=act_txt_mask==0)
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_img_feature, act_txt_feature,cross_attn_result),dim=1)
-        if self.dp_mode == 'dropout_laplacian':
-            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            feature = (feature_concat - feature_min) / (feature_max - feature_min)
-            w = F.sigmoid(self.DP)
-            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
-            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
-            feature = feature + noise * eps_hat
-            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
-                                    hard=hard, dim=0)
-            feature = (feature * mask).sum(0)
-            feature = self.fc_layers(feature)
-            prediction = self.classifier(feature)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
         return prediction
 
-class DoubleStream_ii(nn.Module):
-    def __init__(self,dp_mode):
+class IICA_LapDropout(nn.Module):
+    def __init__(self):
         super().__init__()
-        self.dp_mode = dp_mode
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.visual_encoder = nn.Linear(512, 768)
         bert_output_size = 768
@@ -201,19 +203,75 @@ class DoubleStream_ii(nn.Module):
                                                     memory=act_img_embedding.permute(1,0,2))
         cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
         feature_concat = torch.cat((eeg_img_feature, act_img_feature,cross_attn_result),dim=1)
-        if self.dp_mode == 'dropout_laplacian':
-            feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
-            feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
-            feature = (feature_concat - feature_min) / (feature_max - feature_min)
-            w = F.sigmoid(self.DP)
-            noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
-            eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
-            feature = feature + noise * eps_hat
-            mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
-                                    hard=hard, dim=0)
-            feature = (feature * mask).sum(0)
-            feature = self.fc_layers(feature)
-            prediction = self.classifier(feature)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
         return prediction
 
+class TISC_LapDropout(nn.Module):
+    """
+    --- Our mainly proposed model in paper ---
+    Ti: treat eeg as txt, act as img; ti means txt + img
+    SC: single attention for cross modal feature
+    LapDropout: proposed feature-level Laplacian dropout
+    """
+    def __init__(self,bert_coef):
+        """
+        bert_coef: 
+        """
+        super().__init__()
+        self.bert = BertModel.from_pretrained(bert_coef)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.visual_encoder = nn.Linear(512, 768)
+        bert_output_size = 768
+        self.multi_head_encoderlayer = TransformerEncoderLayer(d_model=bert_output_size)
+        self.multi_head_encoder = TransformerEncoder(self.multi_head_encoderlayer,num_layer=12)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.DP = nn.parameter.Parameter(torch.zeros(1, 768 * 3))
+        self.noiser = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([1.0]))
+        
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask,epsilon,hard):
+        device = self.device
+        eps = torch.tensor(epsilon)
+        eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
+                                                                 attention_mask=eeg_txt_mask,
+                                                                 return_dict=False) #768
+        act_img_embedding = self.visual_encoder(act_img_input)
+        act_img_feature = act_img_embedding.squeeze(1)
+        eeg_txt_semantics_embedding_mean = eeg_txt_semantics_embedding.mean(dim=1).unsqueeze(1)
+        concat_attn_embedding = torch.cat((eeg_txt_semantics_embedding_mean,act_img_embedding),dim=1)
+        concat_attn_embedding = concat_attn_embedding.permute(1,0,2)
+        concat_attn_result =  self.multi_head_encoder(concat_attn_embedding)
+        print(concat_attn_result).shape
+        
+        # cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
+        feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        w = F.sigmoid(self.DP)
+        noise = self.noiser.sample(feature.shape).view(*feature.shape).to(device)
+        eps_hat = 1/(((eps.exp() - w) / (1 - w)).log())  # fix
+        feature = feature + noise * eps_hat
+        mask = F.gumbel_softmax(torch.stack((w, 1 - w)).repeat(1, feature.shape[0], 1), 
+                                hard=hard, dim=0)
+        feature = (feature * mask).sum(0)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
+        return prediction
 
