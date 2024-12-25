@@ -337,45 +337,303 @@ import os
 
 def plot_compare_DP_scheme():
     # 定义文件夹路径
-    base_folder = "logs/compare_private_scheme"
-    # 定义存储数据的字典
     methods_data = {}
+    base_folder = "logs/compare_private_scheme/"
+    # 定义存储数据的字典
+    method_list = ["lapacian_dropout","lapacian_dropout_equal_weight","NDP","DPSGD",]
+
     # 遍历每个子文件夹
-    for method in os.listdir(base_folder):
-        method_path = os.path.join(base_folder, method)
-        if os.path.isdir(method_path):
-            file_path = os.path.join(method_path, "whole_record.txt")
-            epochs = []
-            test_accuracies = []
-            
-            # 读取文件内容
-            with open(file_path, "r") as file:
-                for line in file:
-                    if "Epochs" in line:
-                        epoch = int(line.split(":")[1].strip())
-                        epochs.append(epoch)
-                    elif "Test Accuracy" in line:
-                        test_accuracy = float(line.split(":")[1].strip())
-                        test_accuracies.append(test_accuracy)
-            
-            # 存储数据
-            methods_data[method] = {
-                "epochs": epochs,
-                "test_accuracies": test_accuracies
-            }
+    for method in method_list:
+        file_path = base_folder + method + "/" + "whole_record.txt"
+        epochs = []
+        test_accuracies = []
+        
+        # 读取文件内容
+        with open(file_path, "r") as file:
+            for line in file:
+                if "Epochs" in line:
+                    epoch = int(line.split(":")[1].strip())
+                    epochs.append(epoch)
+                elif "Test Accuracy" in line:
+                    test_accuracy = float(line.split(":")[1].strip())
+                    test_accuracies.append(test_accuracy)
+        
+        # 存储数据
+        methods_data[method] = {
+            "epochs": epochs,
+            "test_accuracies": test_accuracies
+        }
     # 绘制图表
-    plt.figure(figsize=(10, 6))
-    for method, data in methods_data.items():
-        plt.plot(data["epochs"], data["test_accuracies"], label=method)
-    plt.title("Test Accuracy Comparison Across Methods")
-    plt.xlabel("Epochs")
-    plt.ylabel("Test Accuracy")
-    plt.legend()
+    colors = ['#B3D9FB',"#006D77","#83C5BE","#FFDDD2"]
+    scatter_colors = ["#72A0C1","#004B52","#66B7AF","#FFC2AD"]
+    labels = ["Laplacian Dropout (Our Method)",
+              "Laplacian Dropout with Equal Weights (One Relaxation of Our Method with Weaker Privacy)",
+              "NDP (Non-Private Version of Our Method)",
+              "DPSGD (Noise Perturbation on SGD)"
+              ]
+    plt.figure(figsize=(12, 8))
+
+# 绘制图表
+    for i, (method, data) in enumerate(methods_data.items()):
+        color = colors[i%len(colors)]
+        scatter_color = scatter_colors[i%len(scatter_colors)]
+        label = labels[i%len(labels)]
+        plt.plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
+        
+        # 找到最大测试准确率的索引
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))
+        
+        # 绘制最大值的标记
+        plt.scatter(max_test_idx, data["test_accuracies"][max_test_idx], color=scatter_color, s=100, marker='*', zorder=10)
+
+    # 设置标题和标签
+    plt.title('Test Accuracy Comparison Across Methods', fontsize=16)
+    plt.xlabel('Epoch', fontsize=14)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.legend(loc='lower right', fontsize=12)
+    plt.ylim(0.5, 1.05)
+    plt.yticks(np.arange(0.2, 1.05, 0.1))
     plt.grid(True)
-    plt.tight_layout()
+
     plt.tight_layout()
     plt.savefig('result/fig_DP_scheme.pdf') 
     plt.close()
+
+################################### compare modal ######################################
+def plot_compare_modal():
+    # 定义文件夹路径
+    base_folder = "logs/compare_modal/"
+    # 定义存储数据的字典
+    methods_data = {}
+
+    method_list = ["ti","ii","it","tt"]
+
+    # 遍历每个子文件夹
+    for method in method_list:
+        file_path = base_folder + method + "/" + "whole_record.txt"
+        epochs = []
+        test_accuracies = []
+        
+        # 读取文件内容
+        with open(file_path, "r") as file:
+            for line in file:
+                if "Epochs" in line:
+                    epoch = int(line.split(":")[1].strip())
+                    epochs.append(epoch)
+                elif "Test Accuracy" in line:
+                    test_accuracy = float(line.split(":")[1].strip())
+                    test_accuracies.append(test_accuracy)
+        
+        # 存储数据
+        methods_data[method] = {
+            "epochs": epochs,
+            "test_accuracies": test_accuracies
+        }
+
+    file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
+    epochs = []
+    test_accuracies = []
+    
+    # 读取文件内容
+    with open(file_path, "r") as file:
+        for line in file:
+            if "Epochs" in line:
+                epoch = int(line.split(":")[1].strip())
+                epochs.append(epoch)
+            elif "Test Accuracy" in line:
+                test_accuracy = float(line.split(":")[1].strip())
+                test_accuracies.append(test_accuracy)
+    
+    # 存储数据
+    method = "SingStream"
+    methods_data[method] = {
+        "epochs": epochs,
+        "test_accuracies": test_accuracies
+    }
+    # 绘制图表
+    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
+    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
+    labels = [
+        "EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
+        "EEG and Other Modalities as Images; Double Stream Cross Modal",
+        "EEG as Image, Others as Text; Double Stream Cross Modal",
+        "EEG and Other Modalities as Text; Double Stream Cross Modal",
+        "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
+    plt.figure(figsize=(12, 8))
+
+# 绘制图表
+    for i, (method, data) in enumerate(methods_data.items()):
+        color = colors[i%len(colors)]
+        scatter_color = scatter_colors[i%len(scatter_colors)]
+        label = labels[i%len(labels)]
+        plt.plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
+        
+        # 找到最大测试准确率的索引
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))
+        # 绘制最大值的标记
+        plt.scatter(max_test_idx, data["test_accuracies"][max_test_idx], color=scatter_color, s=100, marker='*', zorder=10)
+
+    # 设置标题和标签
+    plt.title('Test Accuracy Comparison Across Methods with Various Modal Selection for Treating EEG, Other Modals (OM) and Cross Modal Features', fontsize=16)
+    plt.xlabel('Epoch', fontsize=14)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.legend(loc='lower right', fontsize=12)
+    plt.ylim(0.5, 1.05)
+    plt.yticks(np.arange(0.5, 1.05, 0.1))
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.savefig('result/fig_ini_weight_and_cross.pdf') 
+    plt.close()
+
+
+############################ time cost #############################
+def time_cost():
+    # 示例数据：方法名称和对应的平均耗时（单位：秒）
+    methods = ["EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
+        "EEG and Other Modalities as Images; Double Stream Cross Modal",
+        "EEG as Image, Others as Text; Double Stream Cross Modal",
+        "EEG and Other Modalities as Text; Double Stream Cross Modal",
+        "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
+    average_times = [67.1, 12.3, 67.8, 154.6, 66.4]
+    # 颜色列表
+    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
+    # 创建条形图
+    plt.figure(figsize=(14, 8))  # 增加图表宽度以适应长标签
+    bars = plt.bar(methods, average_times, color=colors, edgecolor='black')
+
+    # 添加数据标签
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval + 0.5, round(yval, 1), 
+                ha='center', va='bottom', fontsize=12, color='black')
+
+    # 设置标题为斜体并放置在左上角
+    plt.text(-0.5, max(average_times) + 2, 'Average Time Cost Comparison Across Methods', 
+            fontsize=14, fontstyle='italic', ha='left', va='top')
+
+    # 设置坐标轴标签
+    plt.xlabel('Methods', fontsize=14)
+    plt.ylabel('Average Time (seconds)', fontsize=14)
+
+    # 美化图表
+    plt.xticks(rotation=15, fontsize=10, ha='right')  # 旋转x轴标签，避免重叠
+    plt.yticks(fontsize=12)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    plt.tight_layout()
+    plt.savefig('result/time_cost.pdf') 
+    plt.close()
+
+
+
+
+############################### compare modal with time cost ##########################
+
+def plot_compare_modal_with_time_cost():
+    # 定义文件夹路径
+    base_folder = "logs/compare_modal/"
+    # 定义存储数据的字典
+    methods_data = {}
+
+    method_list = ["ti","ii","it","tt"]
+
+    # 遍历每个子文件夹
+    for method in method_list:
+        file_path = base_folder + method + "/" + "whole_record.txt"
+        epochs = []
+        test_accuracies = []
+        
+        # 读取文件内容
+        with open(file_path, "r") as file:
+            for line in file:
+                if "Epochs" in line:
+                    epoch = int(line.split(":")[1].strip())
+                    epochs.append(epoch)
+                elif "Test Accuracy" in line:
+                    test_accuracy = float(line.split(":")[1].strip())
+                    test_accuracies.append(test_accuracy)
+        
+        # 存储数据
+        methods_data[method] = {
+            "epochs": epochs,
+            "test_accuracies": test_accuracies
+        }
+
+    file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
+    epochs = []
+    test_accuracies = []
+    
+    # 读取文件内容
+    with open(file_path, "r") as file:
+        for line in file:
+            if "Epochs" in line:
+                epoch = int(line.split(":")[1].strip())
+                epochs.append(epoch)
+            elif "Test Accuracy" in line:
+                test_accuracy = float(line.split(":")[1].strip())
+                test_accuracies.append(test_accuracy)
+    
+    # 存储数据
+    method = "SingStream"
+    methods_data[method] = {
+        "epochs": epochs,
+        "test_accuracies": test_accuracies
+    }
+    # 绘制图表
+    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
+    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
+    labels = [
+        "EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
+        "EEG and Other Modalities as Images; Double Stream Cross Modal",
+        "EEG as Image, Others as Text; Double Stream Cross Modal",
+        "EEG and Other Modalities as Text; Double Stream Cross Modal",
+        "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
+
+    average_times = [67.1, 12.3, 67.8, 154.6, 66.4]
+    fig,axs = plt.subplots(1,2,figsize = (21,9))
+    bars = axs[1].bar(labels, average_times, color=colors, edgecolor='black',width=0.6)
+    for bar in bars:
+        yval = bar.get_height()
+        axs[1].text(bar.get_x() + bar.get_width()/2, yval + 0.5, round(yval, 1), 
+                ha='center', va='bottom', fontsize=14, color='black')
+        axs[1].set_title('Time Cost')
+    axs[1].set_xticks([])
+    axs[1].set_ylabel('Average Time (seconds)', fontsize=14)
+
+    # 美化图表
+    # axs[0].xticks(rotation=15, fontsize=10, ha='right')  # 旋转x轴标签，避免重叠
+    axs[1].grid(axis='y', linestyle='--', alpha=0.7)
+
+
+
+# 绘制图表
+    for i, (method, data) in enumerate(methods_data.items()):
+        color = colors[i%len(colors)]
+        scatter_color = scatter_colors[i%len(scatter_colors)]
+        label = labels[i%len(labels)]
+        axs[0].plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
+        
+        # 找到最大测试准确率的索引
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))
+        # 绘制最大值的标记
+        axs[0].scatter(max_test_idx, data["test_accuracies"][max_test_idx], color=scatter_color, s=100, marker='*', zorder=10)
+
+    # 设置标题和标签
+    axs[0].set_title('Test Accuracy', fontsize=14)
+    axs[0].set_xlabel('Epoch', fontsize=14)
+    axs[0].set_ylabel('Accuracy', fontsize=14)
+    axs[0].legend(loc='lower right', fontsize=12)
+    axs[0].set_ylim(0.5, 1.05)
+    axs[0].set_yticks(np.arange(0.5, 1.05, 0.1))
+    axs[0].grid(True)
+    fig.suptitle("Test Accuracy and Time Cost Comparison Across Methods with Various Modal Selection for Treating EEG, Other Modals (OM) and Cross Modal Features",
+                 fontsize=16)
+    plt.tight_layout()
+    plt.savefig('result/fig_ini_weight_and_cross_with_time_cost.pdf') 
+    plt.close()
+
+
 if __name__ == '__main__':
     # main_epoch()
     # feature()
@@ -383,7 +641,10 @@ if __name__ == '__main__':
     # eps_epoch()
     # eps_best()
     # feature_new()
-    plot_compare_DP_scheme()
+    # plot_compare_DP_scheme()
+    # plot_compare_modal()
+    time_cost()
+    plot_compare_modal_with_time_cost()
     
         
 
