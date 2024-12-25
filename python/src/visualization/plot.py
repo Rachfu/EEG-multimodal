@@ -7,6 +7,7 @@ import scipy.stats as stats
 import pickle
 import os
 from matplotlib.colors import LogNorm
+import matplotlib.gridspec as gridspec
 
 ####################################### figure_with_epoch #######################################
 """
@@ -381,13 +382,13 @@ def plot_compare_DP_scheme():
         plt.plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
         
         # 找到最大测试准确率的索引
-        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))+1
         
         # 绘制最大值的标记
-        plt.scatter(max_test_idx, data["test_accuracies"][max_test_idx], color=scatter_color, s=100, marker='*', zorder=10)
+        plt.scatter(max_test_idx, data["test_accuracies"][max_test_idx-1], color=scatter_color, s=100, marker='*', zorder=10)
 
     # 设置标题和标签
-    plt.title('Test Accuracy Comparison Across Methods', fontsize=16)
+    plt.title('Test Accuracy Comparison with Various DP Scheme and Privacy Guarantee', fontsize=16)
     plt.xlabel('Epoch', fontsize=14)
     plt.ylabel('Accuracy', fontsize=14)
     plt.legend(loc='lower right', fontsize=12)
@@ -399,7 +400,7 @@ def plot_compare_DP_scheme():
     plt.savefig('result/fig_DP_scheme.pdf') 
     plt.close()
 
-################################### compare modal ######################################
+################################### compare modal 废弃 ######################################
 def plot_compare_modal():
     # 定义文件夹路径
     base_folder = "logs/compare_modal/"
@@ -483,11 +484,11 @@ def plot_compare_modal():
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig('result/fig_ini_weight_and_cross.pdf') 
+    plt.savefig('result/fig_modal.pdf') 
     plt.close()
 
 
-############################ time cost #############################
+############################ time cost 废弃 #############################
 def time_cost():
     # 示例数据：方法名称和对应的平均耗时（单位：秒）
     methods = ["EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
@@ -591,48 +592,115 @@ def plot_compare_modal_with_time_cost():
         "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
 
     average_times = [67.1, 12.3, 67.8, 154.6, 66.4]
-    fig,axs = plt.subplots(1,2,figsize = (21,9))
-    bars = axs[1].bar(labels, average_times, color=colors, edgecolor='black',width=0.6)
+    # fig,axs = plt.subplots(1,2,figsize = (16,9))
+    fig = plt.figure(figsize=(21,9))
+    gs = gridspec.GridSpec(1,2,width_ratios=[2,1])
+    ax1 = plt.subplot(gs[1])
+    bars = ax1.bar(labels, average_times, color=colors, edgecolor='black',width=0.6)
     for bar in bars:
         yval = bar.get_height()
-        axs[1].text(bar.get_x() + bar.get_width()/2, yval + 0.5, round(yval, 1), 
+        ax1.text(bar.get_x() + bar.get_width()/2, yval + 0.5, round(yval, 1), 
                 ha='center', va='bottom', fontsize=14, color='black')
-        axs[1].set_title('Time Cost')
-    axs[1].set_xticks([])
-    axs[1].set_ylabel('Average Time (seconds)', fontsize=14)
+        ax1.set_title('Time Cost',fontsize=14)
+    ax1.set_xticks([])
+    ax1.set_ylabel('Average Time (seconds)', fontsize=14)
 
     # 美化图表
     # axs[0].xticks(rotation=15, fontsize=10, ha='right')  # 旋转x轴标签，避免重叠
-    axs[1].grid(axis='y', linestyle='--', alpha=0.7)
+    ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
 
+
+# 绘制图表
+    ax0 = plt.subplot(gs[0])
+    for i, (method, data) in enumerate(methods_data.items()):
+        color = colors[i%len(colors)]
+        scatter_color = scatter_colors[i%len(scatter_colors)]
+        label = labels[i%len(labels)]
+        ax0.plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
+        
+        # 找到最大测试准确率的索引
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))+1
+        # 绘制最大值的标记
+        ax0.scatter(max_test_idx, data["test_accuracies"][max_test_idx-1], color=scatter_color, s=100, marker='*', zorder=10)
+
+    # 设置标题和标签
+    ax0.set_title('Test Accuracy', fontsize=14)
+    ax0.set_xlabel('Epoch', fontsize=14)
+    ax0.set_ylabel('Accuracy', fontsize=14)
+    ax0.legend(loc='lower right', fontsize=12)
+    ax0.set_ylim(0.5, 1.05)
+    ax0.set_yticks(np.arange(0.5, 1.05, 0.1))
+    ax0.grid(True)
+    fig.suptitle("Test Accuracy and Time Cost Comparison with Various Modal Selection for Treating EEG, Other Modals (OM) and Cross Modal Features",
+                 fontsize=16)
+    plt.tight_layout()
+    plt.savefig('result/fig_modal_with_time_cost.pdf') 
+    plt.close()
+
+
+def plot_compare_ini():
+    methods_data = {}
+    base_folder = "logs/compare_model_ini_wight/"
+    # 定义存储数据的字典
+    method_list = ["bert_base_uncased&ViT_B_32","bert_base_uncased&ViT_B_16","bert_base_uncased&resnet34",
+                   "bert_base_cased&ViT_B_32","bert_base_cased&ViT_B_16","bert_base_cased&resnet34"]
+
+    # 遍历每个子文件夹
+    for method in method_list:
+        file_path = base_folder + method + "/" + "whole_record.txt"
+        epochs = []
+        test_accuracies = []
+        
+        # 读取文件内容
+        with open(file_path, "r") as file:
+            for line in file:
+                if "Epochs" in line:
+                    epoch = int(line.split(":")[1].strip())
+                    epochs.append(epoch)
+                elif "Test Accuracy" in line:
+                    test_accuracy = float(line.split(":")[1].strip())
+                    test_accuracies.append(test_accuracy)
+        
+        # 存储数据
+        methods_data[method] = {
+            "epochs": epochs,
+            "test_accuracies": test_accuracies
+        }
+    # 绘制图表
+    # colors = ['#B3D9FB',"#72EFDD","#5390D9","#5E60CE","#6930C3","#7400B8"]
+    # scatter_colors = ["#72A0C1","#47EBD2","#2C73C9","#3A3CBB","#4F2593","#4E007A"]
+    colors = ['#B3D9FB',"#EDAE49","#D1495B","#76C893","#30638E","#C0C0C0"]
+    scatter_colors = ["#72A0C1","#0573B3","#A32939","#2A567A","#00273D","#5C5C5C"]
+    labels = ["bert-base-uncased&ViT-B/32","bert-base-uncased&ViT-B/16","bert-base-uncased&resnet34",
+                "bert-base-cased&ViT-B/32","bert-base-cased&ViT-B/16","bert-base-cased&resnet34"]
+
+    plt.figure(figsize=(12, 8))
 
 # 绘制图表
     for i, (method, data) in enumerate(methods_data.items()):
         color = colors[i%len(colors)]
         scatter_color = scatter_colors[i%len(scatter_colors)]
         label = labels[i%len(labels)]
-        axs[0].plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
+        plt.plot(data["epochs"], data["test_accuracies"], label=label, color=color, linewidth=4)
         
         # 找到最大测试准确率的索引
-        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"]))
+        max_test_idx = data["test_accuracies"].index(max(data["test_accuracies"])) + 1
         # 绘制最大值的标记
-        axs[0].scatter(max_test_idx, data["test_accuracies"][max_test_idx], color=scatter_color, s=100, marker='*', zorder=10)
+        plt.scatter(max_test_idx, data["test_accuracies"][max_test_idx-1], color=scatter_color, s=100, marker='*', zorder=10)
 
     # 设置标题和标签
-    axs[0].set_title('Test Accuracy', fontsize=14)
-    axs[0].set_xlabel('Epoch', fontsize=14)
-    axs[0].set_ylabel('Accuracy', fontsize=14)
-    axs[0].legend(loc='lower right', fontsize=12)
-    axs[0].set_ylim(0.5, 1.05)
-    axs[0].set_yticks(np.arange(0.5, 1.05, 0.1))
-    axs[0].grid(True)
-    fig.suptitle("Test Accuracy and Time Cost Comparison Across Methods with Various Modal Selection for Treating EEG, Other Modals (OM) and Cross Modal Features",
-                 fontsize=16)
-    plt.tight_layout()
-    plt.savefig('result/fig_ini_weight_and_cross_with_time_cost.pdf') 
-    plt.close()
+    plt.title('Test Accuracy Comparison Various Multimodal Model Initial Weights for Text and Image Feature', fontsize=16)
+    plt.xlabel('Epoch', fontsize=14)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.legend(loc='lower right', fontsize=12)
+    plt.ylim(0.5, 1.05)
+    plt.yticks(np.arange(0.5, 1.05, 0.1))
+    plt.grid(True)
 
+    plt.tight_layout()
+    plt.savefig('result/fig_ini.pdf') 
+    plt.close()
 
 if __name__ == '__main__':
     # main_epoch()
@@ -642,9 +710,8 @@ if __name__ == '__main__':
     # eps_best()
     # feature_new()
     # plot_compare_DP_scheme()
-    # plot_compare_modal()
-    time_cost()
     plot_compare_modal_with_time_cost()
+    # plot_compare_ini()
     
         
 
