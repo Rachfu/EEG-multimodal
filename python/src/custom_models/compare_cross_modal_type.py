@@ -29,8 +29,8 @@ set_seed(980616)
 
 class CompareCrossModalType(object):
     def __init__(self,
+                 train_type = "compare_corss_model_type_3layers_v2",
                  multimodal_type = "ti",
-                 train_type = "compare_corss_model_type",
                  txt_model="bert",
                  txt_model_coef="bert-base-uncased",
                  img_model="clip",
@@ -50,14 +50,16 @@ class CompareCrossModalType(object):
     def double_stream(self):
         set_seed(980616)
         cross_atn_type = "double_stream"
-        self.python_job.train(self.train_type,self.multimodal_type,self.dp_mode,self.txt_model,self.txt_model_coef,self.img_model,self.img_model_coef,cross_atn_type,self.epsilon)
+        path_suffix = cross_atn_type + "/"
+        self.python_job.train(self.train_type,path_suffix,self.multimodal_type,self.dp_mode,self.txt_model,self.txt_model_coef,self.img_model,self.img_model_coef,cross_atn_type,self.epsilon)
     def single_stream(self):
         set_seed(980616)
         cross_atn_type = "single_stream"
-        self.python_job.train(self.train_type,self.multimodal_type,self.dp_mode,self.txt_model,self.txt_model_coef,self.img_model,self.img_model_coef,cross_atn_type,self.epsilon)
+        path_suffix = cross_atn_type + "/"
+        self.python_job.train(self.train_type,path_suffix,self.multimodal_type,self.dp_mode,self.txt_model,self.txt_model_coef,self.img_model,self.img_model_coef,cross_atn_type,self.epsilon)
     def run(self):
         set_seed(980616)
-        self.double_stream() # in demo 
+        # self.double_stream()
         self.single_stream()
 
 if __name__ == "__main__":

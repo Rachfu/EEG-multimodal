@@ -61,38 +61,42 @@ class CompareModal(object):
     def test_ti(self):
         set_seed(980616)
         multimodal_type = "ti"
+        path_suffix = multimodal_type + "/"
         eeg_model = self.txt_model
         eeg_model_coef = self.txt_model_coef
         act_model = self.img_model
         act_model_coef = self.img_model_coef
-        self.python_job.train(self.train_type,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
+        self.python_job.train(self.train_type,path_suffix,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
     def test_tt(self):
         set_seed(980616)
         multimodal_type = "tt"
+        path_suffix = multimodal_type + "/"
         eeg_model = self.txt_model
         eeg_model_coef = self.txt_model_coef
         act_model = self.txt_model
         act_model_coef = self.txt_model_coef
-        self.python_job.train(self.train_type,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
+        self.python_job.train(self.train_type,path_suffix,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
     def test_it(self):
         set_seed(980616)
         multimodal_type = "it"
+        path_suffix = multimodal_type + "/"
         eeg_model = self.img_model
         eeg_model_coef = self.img_model_coef
         act_model = self.txt_model
         act_model_coef = self.txt_model_coef
-        self.python_job.train(self.train_type,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
+        self.python_job.train(self.train_type,path_suffix,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
     def test_ii(self):
         set_seed(980616)
         multimodal_type = "ii"
+        path_suffix = multimodal_type + "/"
         eeg_model = self.img_model
         eeg_model_coef = self.img_model_coef
         act_model = self.img_model
         act_model_coef = self.img_model_coef
-        self.python_job.train(self.train_type,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
+        self.python_job.train(self.train_type,path_suffix,multimodal_type,self.dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,self.cross_atn_type,self.epsilon)
     def run(self):
         set_seed(980616)
-        # self.test_ti() # In demo model
+        self.test_ti() # In demo model
         self.test_tt()
         self.test_it()
         self.test_ii()

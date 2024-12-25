@@ -1,10 +1,10 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from dataset import MultiModalDataset_ti,MultiModalDataset_tt,MultiModalDataset_it,MultiModalDataset_ii
-from models import TICA_LapDropout,TTCA_LapDropout,ITCA_LapDropout,IICA_LapDropout,TISC_LapDropout,TICA_DPSGD
+from models import TICA_LapDropout,TTCA_LapDropout,ITCA_LapDropout,IICA_LapDropout,TISC_LapDropout,TICA_DPSGD,TICA_NonPrivate,TISC_LapDropoutEquWeight
 import torch
 import numpy as np
 import pandas as pd
@@ -64,7 +64,7 @@ class TrainAndTest(object):
             accuracy = (label == pred_label_id).float().sum() / label.shape[0]
         return loss, accuracy, pred_label_id, label
 
-    def train(self,train_type,multimodal_type,dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,cross_atn_type,epsilon):
+    def train(self,train_type,path_suffix,multimodal_type,dp_mode,eeg_model,eeg_model_coef,act_model,act_model_coef,cross_atn_type,epsilon):
         """
         multimodal_type = "ti","tt","it","ii"
         dp_mode: "lapacian_dropout"
@@ -131,6 +131,10 @@ class TrainAndTest(object):
                     model = TICA_LapDropout(bert_coef = eeg_model_coef)
                 if dp_mode == "DPSGD":
                     model = TICA_DPSGD(bert_coef = eeg_model_coef)
+                if dp_mode == "NDP":
+                    model = TICA_NonPrivate(bert_coef = eeg_model_coef)
+                if dp_mode == "lapacian_dropout_equal_weight":
+                    model = TISC_LapDropoutEquWeight(bert_coef = eeg_model_coef,dropout_rate=0.5) # choose as the initial weight of DP-MLD, i.e. 0.5
             if multimodal_type == "tt":
                 if dp_mode == 'lapacian_dropout':
                     model = TTCA_LapDropout(bert_coef = eeg_model_coef)
@@ -148,8 +152,9 @@ class TrainAndTest(object):
         # training settings
         learning_rate = self.learning_rate
         epochs = self.epochs
-        model_path = "models/custom/"+ train_type +"/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
-        log_path = "logs/" + train_type +"/" + cross_atn_type +"/"+multimodal_type+"/"+eeg_model_coef_standardized+"&"+act_model_coef_standardized+"/" + str(epsilon)+"/"
+        model_path = "models/custom/"+ train_type +"/" + path_suffix
+        log_path = "logs/" + train_type +"/" + path_suffix
+        
         for path in [model_path,log_path]:
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -252,75 +257,82 @@ class TrainAndTest(object):
 
         if dp_mode == "DPSGD":
             # progressive training
-            epochs_progressive = 5
-            optimizer = Adam(model.parameters(), lr=learning_rate)
-            device = self.device
-            model = model.to(device)
-            for epoch in range(epochs_progressive):
-                start_time = time.time()
-                epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
+            # epochs_progressive = 1
+            # optimizer = Adam(model.parameters(), lr=learning_rate)
+            # device = self.device
+            # model = model.to(device)
+            # for epoch in range(epochs_progressive):
+            #     start_time = time.time()
+            #     epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
 
-                model.train()
-                for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
-                    sample_size_train+=1
-                    model.train()
-                    optimizer.zero_grad()
-                    eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
-                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
-                    loss, accuracy, _, _ = self.cal_loss(prediction,label)  
-                    loss.backward()
-                    optimizer.step()
-                    epoch_loss_train += loss.item()
-                    epoch_acc_train += accuracy.item()
+            #     model.train()
+            #     for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
+            #         sample_size_train+=1
+            #         model.train()
+            #         optimizer.zero_grad()
+            #         eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+            #         prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+            #         loss, accuracy, _, _ = self.cal_loss(prediction,label)  
+            #         loss.backward()
+            #         optimizer.step()
+            #         epoch_loss_train += loss.item()
+            #         epoch_acc_train += accuracy.item()
                     
-                prediction_all = []
-                label_all = []
-                model.eval()
-                with torch.no_grad():
-                    for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(test_dataloader):
-                        sample_size_test +=1
-                        eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
-                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
-                        loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
-                        prediction_all.extend(pred_label_id.cpu().numpy())
-                        label_all.extend(label_id.cpu().numpy())
-                        epoch_loss_test += loss.item()
-                        epoch_acc_test += accuracy.item()
+            #     prediction_all = []
+            #     label_all = []
+            #     model.eval()
+            #     with torch.no_grad():
+            #         for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(test_dataloader):
+            #             sample_size_test +=1
+            #             eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+            #             prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+            #             loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
+            #             prediction_all.extend(pred_label_id.cpu().numpy())
+            #             label_all.extend(label_id.cpu().numpy())
+            #             epoch_loss_test += loss.item()
+            #             epoch_acc_test += accuracy.item()
 
-                f1_score_epoch = f1_score(prediction_all,label_all)
-                end_time = time.time()
-                time_cost = end_time-start_time
-                current_datetime = datetime.now()
-                formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                record = f'''Epochs: {epoch + 1}
-                | Train Loss: {epoch_loss_train/sample_size_train: .3f}
-                | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
-                | Test Loss: {epoch_loss_test/sample_size_test: .3f}
-                | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
-                | f_1 Score: {f1_score_epoch: .3f}
-                | Time Cost: {time_cost: .1f}
-                | Record Time: {formatted_datetime} \n'''
-                print(record)
-                with open(whole_log_path, "a") as file:
-                    file.write(record)
+            #     f1_score_epoch = f1_score(prediction_all,label_all)
+            #     end_time = time.time()
+            #     time_cost = end_time-start_time
+            #     current_datetime = datetime.now()
+            #     formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            #     record = f'''Epochs: {epoch + 1}
+            #     | Train Loss: {epoch_loss_train/sample_size_train: .3f}
+            #     | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
+            #     | Test Loss: {epoch_loss_test/sample_size_test: .3f}
+            #     | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
+            #     | f_1 Score: {f1_score_epoch: .3f}
+            #     | Time Cost: {time_cost: .1f}
+            #     | Record Time: {formatted_datetime} \n'''
+            #     print(record)
+            #     with open(whole_log_path, "a") as file:
+            #         file.write(record)
 
-                if f1_score_epoch > f1_score_best:
-                    torch.save(model.state_dict(), save_model_path)
-                    f1_best_record = record
-                    f1_score_best = f1_score_epoch
-                    with open(best_log_path, "w") as file:
-                        file.write(f1_best_record)
+            #     if f1_score_epoch > f1_score_best:
+            #         torch.save(model.state_dict(), save_model_path)
+            #         f1_best_record = record
+            #         f1_score_best = f1_score_epoch
+            #         with open(best_log_path, "w") as file:
+            #             file.write(f1_best_record)
 
 
             model.to("cpu")
             model.train()
-            trainable_layers = [model.bert.encoder.layer[-1],model.fc_layers,model.classifier]
+            trainable_layers = [model.bert.encoder.layer[-1],model.bert.pooler,model.fc_layers,model.visual_encoder,model.classifier]
+            # print(model)
+            total_params = 0
+            trainable_params = 0
             for p in model.parameters():
                 p.requires_grad = False
+                total_params += p.numel()
 
             for layer in trainable_layers:
                 for p in layer.parameters():
                     p.requires_grad = True
+                    trainable_params += p.numel()
+            print(f"Total parameters count: {total_params:,}")
+            print(f"Trainable parameters count: {trainable_params:,}")
             optimizer = Adam(model.parameters(), lr=learning_rate)
             DELTA = 1 / len(train_dataloader) # Parameter for privacy accounting. Probability of not achieving privacy guarantees
             MAX_GRAD_NORM = 0.1
@@ -366,7 +378,7 @@ class TrainAndTest(object):
             device = self.device
             model = model.to(device)
             # training
-            for epoch in range(epochs_progressive,epochs):
+            for epoch in range(epochs):
                 start_time = time.time()
                 epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
 
@@ -421,14 +433,132 @@ class TrainAndTest(object):
                     with open(best_log_path, "w") as file:
                         file.write(f1_best_record)
 
+        if dp_mode == "NDP":
+            optimizer = Adam(model.parameters(), lr=learning_rate)
+            device = self.device
+            model = model.to(device)
+            for epoch in range(epochs):
+                start_time = time.time()
+                epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
 
+                model.train()
+                for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
+                    sample_size_train+=1
+                    model.train()
+                    optimizer.zero_grad()
+                    eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+                    loss, accuracy, _, _ = self.cal_loss(prediction,label)  
+                    loss.backward()
+                    optimizer.step()
+                    epoch_loss_train += loss.item()
+                    epoch_acc_train += accuracy.item()
+                    
+                prediction_all = []
+                label_all = []
+                model.eval()
+                with torch.no_grad():
+                    for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(test_dataloader):
+                        sample_size_test +=1
+                        eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask)
+                        loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
+                        prediction_all.extend(pred_label_id.cpu().numpy())
+                        label_all.extend(label_id.cpu().numpy())
+                        epoch_loss_test += loss.item()
+                        epoch_acc_test += accuracy.item()
+
+                f1_score_epoch = f1_score(prediction_all,label_all)
+                end_time = time.time()
+                time_cost = end_time-start_time
+                current_datetime = datetime.now()
+                formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                record = f'''Epochs: {epoch + 1}
+                | Train Loss: {epoch_loss_train/sample_size_train: .3f}
+                | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
+                | Test Loss: {epoch_loss_test/sample_size_test: .3f}
+                | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
+                | f_1 Score: {f1_score_epoch: .3f}
+                | Time Cost: {time_cost: .1f}
+                | Record Time: {formatted_datetime} \n'''
+                print(record)
+                with open(whole_log_path, "a") as file:
+                    file.write(record)
+
+                if f1_score_epoch > f1_score_best:
+                    torch.save(model.state_dict(), save_model_path)
+                    f1_best_record = record
+                    f1_score_best = f1_score_epoch
+                    with open(best_log_path, "w") as file:
+                        file.write(f1_best_record)
+
+        if dp_mode == "lapacian_dropout_equal_weight":
+            print("yeah")
+            optimizer = Adam(model.parameters(), lr=learning_rate)
+            device = self.device
+            model = model.to(device)
+            for epoch in range(epochs):
+                start_time = time.time()
+                epoch_acc_train,epoch_loss_train,epoch_acc_test,epoch_loss_test,sample_size_train,sample_size_test = [0]*6
+
+                model.train()
+                for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(train_dataloader):
+                    sample_size_train+=1
+                    model.train()
+                    optimizer.zero_grad()
+                    eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                    prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                    loss, accuracy, _, _ = self.cal_loss(prediction,label)  
+                    loss.backward()
+                    optimizer.step()
+                    epoch_loss_train += loss.item()
+                    epoch_acc_train += accuracy.item()
+                    
+                prediction_all = []
+                label_all = []
+                model.eval()
+                with torch.no_grad():
+                    for eeg_input,eeg_mask,act_input,act_mask,label in tqdm(test_dataloader):
+                        sample_size_test +=1
+                        eeg_input,eeg_mask,act_input,act_mask,label = eeg_input.to(device), eeg_mask.to(device),act_input.to(device), act_mask.to(device), label.to(device)
+                        prediction = model(eeg_input,eeg_mask,act_input.to(torch.float32),act_mask,epsilon)
+                        loss, accuracy, pred_label_id, label_id = self.cal_loss(prediction,label)
+                        prediction_all.extend(pred_label_id.cpu().numpy())
+                        label_all.extend(label_id.cpu().numpy())
+                        epoch_loss_test += loss.item()
+                        epoch_acc_test += accuracy.item()
+
+                f1_score_epoch = f1_score(prediction_all,label_all)
+                end_time = time.time()
+                time_cost = end_time-start_time
+                current_datetime = datetime.now()
+                formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                record = f'''Epochs: {epoch + 1}
+                | Train Loss: {epoch_loss_train/sample_size_train: .3f}
+                | Train Accuracy: {epoch_acc_train/sample_size_train: .3f}
+                | Test Loss: {epoch_loss_test/sample_size_test: .3f}
+                | Test Accuracy: {epoch_acc_test/sample_size_test: .3f}
+                | f_1 Score: {f1_score_epoch: .3f}
+                | Time Cost: {time_cost: .1f}
+                | Record Time: {formatted_datetime} \n'''
+                print(record)
+                with open(whole_log_path, "a") as file:
+                    file.write(record)
+
+                if f1_score_epoch > f1_score_best:
+                    torch.save(model.state_dict(), save_model_path)
+                    f1_best_record = record
+                    f1_score_best = f1_score_epoch
+                    with open(best_log_path, "w") as file:
+                        file.write(f1_best_record)
 if __name__ == "__main__":
     set_seed(980616)
-    print("I'm running to for compare_DP_scheme")
+    # print("I'm running to for compare our corresponding nonprivate version NDP-MLD")
+    print("I'm running to for compare Laplacian dropout with feature-level equal Laplacian noises and dropout rates")
     python_job = TrainAndTest()
-    train_type = "compare_DP_scheme"
+    train_type = "compare_lapacian_dropout_equal_weight"
     multimodal_type = "ti"
-    dp_mode  ="DPSGD"
+    dp_mode  ="lapacian_dropout_equal_weight"
     eeg_model="bert"
     eeg_model_coef="bert-base-uncased"
     act_model="clip"

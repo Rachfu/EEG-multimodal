@@ -1,0 +1,6 @@
+Epochs: 39
+                | Train Loss:  0.564
+                | Train Accuracy:  0.697
+                | Test Loss:  0.551
+                | Test Accuracy:  0.747
+                | f_1 Score:  0.834

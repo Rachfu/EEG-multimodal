@@ -1,0 +1,300 @@
+Epochs: 1
+                | Train Loss:  0.678
+                | Train Accuracy:  0.610
+                | Test Loss:  0.638
+                | Test Accuracy:  0.678
+                | f_1 Score:  0.799
+Epochs: 2
+                | Train Loss:  0.651
+                | Train Accuracy:  0.648
+                | Test Loss:  0.623
+                | Test Accuracy:  0.678
+                | f_1 Score:  0.802
+Epochs: 3
+                | Train Loss:  0.635
+                | Train Accuracy:  0.659
+                | Test Loss:  0.581
+                | Test Accuracy:  0.697
+                | f_1 Score:  0.813
+Epochs: 4
+                | Train Loss:  0.579
+                | Train Accuracy:  0.686
+                | Test Loss:  0.564
+                | Test Accuracy:  0.720
+                | f_1 Score:  0.830
+Epochs: 5
+                | Train Loss:  0.539
+                | Train Accuracy:  0.715
+                | Test Loss:  0.525
+                | Test Accuracy:  0.743
+                | f_1 Score:  0.845
+Epochs: 6
+                | Train Loss:  0.500
+                | Train Accuracy:  0.759
+                | Test Loss:  0.476
+                | Test Accuracy:  0.770
+                | f_1 Score:  0.858
+Epochs: 7
+                | Train Loss:  0.466
+                | Train Accuracy:  0.777
+                | Test Loss:  0.443
+                | Test Accuracy:  0.814
+                | f_1 Score:  0.875
+Epochs: 8
+                | Train Loss:  0.429
+                | Train Accuracy:  0.830
+                | Test Loss:  0.413
+                | Test Accuracy:  0.852
+                | f_1 Score:  0.897
+Epochs: 9
+                | Train Loss:  0.404
+                | Train Accuracy:  0.843
+                | Test Loss:  0.383
+                | Test Accuracy:  0.877
+                | f_1 Score:  0.910
+Epochs: 10
+                | Train Loss:  0.370
+                | Train Accuracy:  0.876
+                | Test Loss:  0.356
+                | Test Accuracy:  0.887
+                | f_1 Score:  0.918
+Epochs: 11
+                | Train Loss:  0.347
+                | Train Accuracy:  0.894
+                | Test Loss:  0.341
+                | Test Accuracy:  0.893
+                | f_1 Score:  0.922
+Epochs: 12
+                | Train Loss:  0.319
+                | Train Accuracy:  0.914
+                | Test Loss:  0.317
+                | Test Accuracy:  0.908
+                | f_1 Score:  0.933
+Epochs: 13
+                | Train Loss:  0.285
+                | Train Accuracy:  0.927
+                | Test Loss:  0.285
+                | Test Accuracy:  0.924
+                | f_1 Score:  0.944
+Epochs: 14
+                | Train Loss:  0.268
+                | Train Accuracy:  0.929
+                | Test Loss:  0.259
+                | Test Accuracy:  0.944
+                | f_1 Score:  0.958
+Epochs: 15
+                | Train Loss:  0.258
+                | Train Accuracy:  0.941
+                | Test Loss:  0.295
+                | Test Accuracy:  0.910
+                | f_1 Score:  0.935
+Epochs: 16
+                | Train Loss:  0.232
+                | Train Accuracy:  0.947
+                | Test Loss:  0.260
+                | Test Accuracy:  0.933
+                | f_1 Score:  0.951
+Epochs: 17
+                | Train Loss:  0.200
+                | Train Accuracy:  0.961
+                | Test Loss:  0.251
+                | Test Accuracy:  0.928
+                | f_1 Score:  0.947
+Epochs: 18
+                | Train Loss:  0.198
+                | Train Accuracy:  0.958
+                | Test Loss:  0.225
+                | Test Accuracy:  0.942
+                | f_1 Score:  0.958
+Epochs: 19
+                | Train Loss:  0.185
+                | Train Accuracy:  0.960
+                | Test Loss:  0.196
+                | Test Accuracy:  0.952
+                | f_1 Score:  0.965
+Epochs: 20
+                | Train Loss:  0.159
+                | Train Accuracy:  0.973
+                | Test Loss:  0.192
+                | Test Accuracy:  0.959
+                | f_1 Score:  0.970
+Epochs: 21
+                | Train Loss:  0.155
+                | Train Accuracy:  0.970
+                | Test Loss:  0.198
+                | Test Accuracy:  0.954
+                | f_1 Score:  0.967
+Epochs: 22
+                | Train Loss:  0.142
+                | Train Accuracy:  0.974
+                | Test Loss:  0.171
+                | Test Accuracy:  0.964
+                | f_1 Score:  0.973
+Epochs: 23
+                | Train Loss:  0.136
+                | Train Accuracy:  0.971
+                | Test Loss:  0.166
+                | Test Accuracy:  0.964
+                | f_1 Score:  0.973
+Epochs: 24
+                | Train Loss:  0.124
+                | Train Accuracy:  0.979
+                | Test Loss:  0.151
+                | Test Accuracy:  0.962
+                | f_1 Score:  0.972
+Epochs: 25
+                | Train Loss:  0.112
+                | Train Accuracy:  0.979
+                | Test Loss:  0.158
+                | Test Accuracy:  0.969
+                | f_1 Score:  0.977
+Epochs: 26
+                | Train Loss:  0.100
+                | Train Accuracy:  0.983
+                | Test Loss:  0.138
+                | Test Accuracy:  0.954
+                | f_1 Score:  0.975
+Epochs: 27
+                | Train Loss:  0.096
+                | Train Accuracy:  0.983
+                | Test Loss:  0.141
+                | Test Accuracy:  0.964
+                | f_1 Score:  0.974
+Epochs: 28
+                | Train Loss:  0.093
+                | Train Accuracy:  0.986
+                | Test Loss:  0.110
+                | Test Accuracy:  0.972
+                | f_1 Score:  0.979
+Epochs: 29
+                | Train Loss:  0.078
+                | Train Accuracy:  0.989
+                | Test Loss:  0.099
+                | Test Accuracy:  0.974
+                | f_1 Score:  0.981
+Epochs: 30
+                | Train Loss:  0.079
+                | Train Accuracy:  0.988
+                | Test Loss:  0.146
+                | Test Accuracy:  0.964
+                | f_1 Score:  0.974
+Epochs: 31
+                | Train Loss:  0.071
+                | Train Accuracy:  0.986
+                | Test Loss:  0.104
+                | Test Accuracy:  0.967
+                | f_1 Score:  0.976
+Epochs: 32
+                | Train Loss:  0.061
+                | Train Accuracy:  0.992
+                | Test Loss:  0.142
+                | Test Accuracy:  0.965
+                | f_1 Score:  0.975
+Epochs: 33
+                | Train Loss:  0.074
+                | Train Accuracy:  0.985
+                | Test Loss:  0.152
+                | Test Accuracy:  0.962
+                | f_1 Score:  0.973
+Epochs: 34
+                | Train Loss:  0.072
+                | Train Accuracy:  0.987
+                | Test Loss:  0.108
+                | Test Accuracy:  0.967
+                | f_1 Score:  0.976
+Epochs: 35
+                | Train Loss:  0.049
+                | Train Accuracy:  0.992
+                | Test Loss:  0.135
+                | Test Accuracy:  0.964
+                | f_1 Score:  0.973
+Epochs: 36
+                | Train Loss:  0.059
+                | Train Accuracy:  0.990
+                | Test Loss:  0.123
+                | Test Accuracy:  0.974
+                | f_1 Score:  0.981
+Epochs: 37
+                | Train Loss:  0.057
+                | Train Accuracy:  0.991
+                | Test Loss:  0.099
+                | Test Accuracy:  0.977
+                | f_1 Score:  0.983
+Epochs: 38
+                | Train Loss:  0.048
+                | Train Accuracy:  0.994
+                | Test Loss:  0.094
+                | Test Accuracy:  0.979
+                | f_1 Score:  0.984
+Epochs: 39
+                | Train Loss:  0.050
+                | Train Accuracy:  0.994
+                | Test Loss:  0.117
+                | Test Accuracy:  0.970
+                | f_1 Score:  0.978
+Epochs: 40
+                | Train Loss:  0.043
+                | Train Accuracy:  0.993
+                | Test Loss:  0.120
+                | Test Accuracy:  0.972
+                | f_1 Score:  0.980
+Epochs: 41
+                | Train Loss:  0.041
+                | Train Accuracy:  0.993
+                | Test Loss:  0.115
+                | Test Accuracy:  0.982
+                | f_1 Score:  0.987
+Epochs: 42
+                | Train Loss:  0.046
+                | Train Accuracy:  0.993
+                | Test Loss:  0.141
+                | Test Accuracy:  0.972
+                | f_1 Score:  0.980
+Epochs: 43
+                | Train Loss:  0.044
+                | Train Accuracy:  0.994
+                | Test Loss:  0.068
+                | Test Accuracy:  0.987
+                | f_1 Score:  0.990
+Epochs: 44
+                | Train Loss:  0.045
+                | Train Accuracy:  0.993
+                | Test Loss:  0.132
+                | Test Accuracy:  0.974
+                | f_1 Score:  0.980
+Epochs: 45
+                | Train Loss:  0.047
+                | Train Accuracy:  0.989
+                | Test Loss:  0.114
+                | Test Accuracy:  0.977
+                | f_1 Score:  0.983
+Epochs: 46
+                | Train Loss:  0.045
+                | Train Accuracy:  0.991
+                | Test Loss:  0.122
+                | Test Accuracy:  0.969
+                | f_1 Score:  0.977
+Epochs: 47
+                | Train Loss:  0.039
+                | Train Accuracy:  0.995
+                | Test Loss:  0.153
+                | Test Accuracy:  0.970
+                | f_1 Score:  0.978
+Epochs: 48
+                | Train Loss:  0.048
+                | Train Accuracy:  0.988
+                | Test Loss:  0.095
+                | Test Accuracy:  0.980
+                | f_1 Score:  0.985
+Epochs: 49
+                | Train Loss:  0.037
+                | Train Accuracy:  0.993
+                | Test Loss:  0.118
+                | Test Accuracy:  0.975
+                | f_1 Score:  0.982
+Epochs: 50
+                | Train Loss:  0.030
+                | Train Accuracy:  0.996
+                | Test Loss:  0.099
+                | Test Accuracy:  0.980
+                | f_1 Score:  0.986

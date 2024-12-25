@@ -233,7 +233,7 @@ class TISC_LapDropout(nn.Module):
         self.visual_encoder = nn.Linear(512, 768)
         bert_output_size = 768
         self.multi_head_encoderlayer = TransformerEncoderLayer(d_model=bert_output_size, nhead=12)
-        self.multi_head_encoder = TransformerEncoder(self.multi_head_encoderlayer,num_layers=12)
+        self.multi_head_encoder = TransformerEncoder(self.multi_head_encoderlayer,num_layers=3)
         self.fc_layers = nn.Sequential(
             nn.Linear(3*768, 3*768),
             nn.ReLU(),
@@ -284,6 +284,43 @@ class TICA_DPSGD(nn.Module):
         super().__init__()
         self.bert = BertModel.from_pretrained(bert_coef)
         self.visual_encoder = nn.Linear(512, 768)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(2*768, 2*768),
+            nn.ReLU(),
+            nn.Linear(2*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask):
+        eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
+                                                                 attention_mask=eeg_txt_mask,
+                                                                 return_dict=False) #768
+        act_img_embedding = self.visual_encoder(act_img_input)
+        act_img_feature = act_img_embedding.squeeze(1)
+        feature_concat = torch.cat((eeg_txt_feature, act_img_feature),dim=1)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
+        return prediction
+
+class TICA_NonPrivate(nn.Module):
+    """
+    --- Our mainly proposed model in paper ---
+    Ti: treat eeg as txt, act as img; ti means txt + img
+    CA: cross-attention for cross modal feature
+    NonPrivate: nonprivate version
+    """
+    def __init__(self,bert_coef):
+        """
+        bert_coef: 
+        """
+        super().__init__()
+        self.bert = BertModel.from_pretrained(bert_coef)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.visual_encoder = nn.Linear(512, 768)
         bert_output_size = 768
         self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
         self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
@@ -310,6 +347,62 @@ class TICA_DPSGD(nn.Module):
         feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
         feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
         feature = (feature_concat - feature_min) / (feature_max - feature_min)
+        feature = self.fc_layers(feature)
+        prediction = self.classifier(feature)
+        return prediction
+    
+class TISC_LapDropoutEquWeight(nn.Module):
+    """
+    Ti: treat eeg as txt, act as img; ti means txt + img
+    SC: single attention for cross modal feature
+    LapDropoutEquWeight: feature-level equally weightted Laplacian noise + dropout; an example case included in our 
+                         proposed DP-MLD; but weaker privacy protection
+    """
+    def __init__(self,bert_coef,dropout_rate):
+        """
+        bert_coef: 
+        """
+        super().__init__()
+        self.bert = BertModel.from_pretrained(bert_coef)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.visual_encoder = nn.Linear(512, 768)
+        bert_output_size = 768
+        self.multi_head_decoderlayer = TransformerDecoderLayer(d_model=bert_output_size, nhead=12)
+        self.multi_head_decoder = TransformerDecoder(self.multi_head_decoderlayer, num_layers=3)
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3*768, 3*768),
+            nn.ReLU(),
+            nn.Linear(3*768, 768),
+            nn.Tanh(),
+        )
+        self.classifier = nn.Linear(768, 2)
+        self.dropout_rate = dropout_rate 
+        self.dropout = nn.Dropout(self.dropout_rate)
+        
+    def forward(self, eeg_txt_input,eeg_txt_mask,act_img_input,act_img_mask,epsilon):
+        device = self.device
+        eeg_txt_semantics_embedding, eeg_txt_feature = self.bert(input_ids= eeg_txt_input, 
+                                                                 attention_mask=eeg_txt_mask,
+                                                                 return_dict=False) #768
+        act_img_embedding = self.visual_encoder(act_img_input)
+        act_img_feature = act_img_embedding.squeeze(1)
+        cross_attn_result = self.multi_head_decoder(tgt=act_img_embedding.permute(1,0,2), 
+                                                    memory=eeg_txt_semantics_embedding.permute(1,0,2),
+                                                    tgt_key_padding_mask=act_img_mask==0, 
+                                                    memory_key_padding_mask=eeg_txt_mask==0)
+        cross_attn_result = cross_attn_result.permute(1,0,2).mean(dim=1) #768
+        feature_concat = torch.cat((eeg_txt_feature, act_img_feature,cross_attn_result),dim=1)
+        feature_min = torch.min(feature_concat, dim=-1, keepdims=True)[0]
+        feature_max = torch.max(feature_concat, dim=-1, keepdims=True)[0]
+        feature = (feature_concat - feature_min) / (feature_max - feature_min)
+
+        feature = self.dropout(feature)        
+        dropout_rate = self.dropout_rate
+        eps_hat = 1/(np.log(((np.exp(epsilon) - dropout_rate) / (1 - dropout_rate))))
+        lap_sigma=1/eps_hat
+        m = torch.distributions.laplace.Laplace(torch.tensor([0.0]), torch.tensor([lap_sigma]))
+        noise = m.sample([feature.shape[0]]).to(device)
+        feature += noise.view(-1, 1)
         feature = self.fc_layers(feature)
         prediction = self.classifier(feature)
         return prediction

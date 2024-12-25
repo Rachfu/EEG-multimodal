@@ -1,8 +1,0 @@
-Epochs: 45
-            | Train Loss:  0.285
-            | Train Accuracy:  0.900
-            | Test Loss:  0.196
-            | Test Accuracy:  0.946
-            | f_1 Score:  0.960
-            | Time Cost:  67.5
-            | Record Time: 2024-12-23 11:13:35 

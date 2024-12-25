@@ -65,7 +65,8 @@ class CompareModelIniWeight(object):
             ["bert","bert-base-cased","resnet","resnet34"]
         ]:
             print(txt_model,txt_coef,img_model,img_coef)
-            self.python_job.train(self.train_type,self.multimodal_type,self.dp_mode,txt_model,txt_coef,img_model,img_coef,self.cross_atn_type,self.epsilon)
+            path_suffix = txt_coef.replace("/","_").replace("-","_") + "&" + img_coef.replace("/","_").replace("-","_") +"/"
+            self.python_job.train(self.train_type,path_suffix,self.multimodal_type,self.dp_mode,txt_model,txt_coef,img_model,img_coef,self.cross_atn_type,self.epsilon)
 
 if __name__ == "__main__":
     set_seed(980616)
