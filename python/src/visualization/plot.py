@@ -455,11 +455,11 @@ def plot_compare_modal():
     colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
     scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
     labels = [
-        "EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
-        "EEG and Other Modalities as Images; Double Stream Cross Modal",
-        "EEG as Image, Others as Text; Double Stream Cross Modal",
-        "EEG and Other Modalities as Text; Double Stream Cross Modal",
-        "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
+        "EEG as Text, OM as Image; Double Stream Cross Modal(Our Method)",
+        "EEG and OM as Image; Double Stream Cross Modal",
+        "EEG as Image, OM as Text; Double Stream Cross Modal",
+        "EEG and OM as Text; Double Stream Cross Modal",
+        "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",]
     plt.figure(figsize=(12, 8))
 
 # 绘制图表
@@ -584,12 +584,13 @@ def plot_compare_modal_with_time_cost():
     # 绘制图表
     colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
     scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
-    labels = [
-        "EEG as Text, Others as Images; Double Stream Cross Modal(Our Method)",
-        "EEG and Other Modalities as Images; Double Stream Cross Modal",
-        "EEG as Image, Others as Text; Double Stream Cross Modal",
-        "EEG and Other Modalities as Text; Double Stream Cross Modal",
-        "EEG as Text, Others as Images; Single Stream Cross Modal (One Variant of Our Method)",]
+    labels =  [
+        "EEG as Text, OM as Image; Double Stream Cross Modal(Our Method)",
+        "EEG and OM as Image; Double Stream Cross Modal",
+        "EEG as Image, OM as Text; Double Stream Cross Modal",
+        "EEG and OM as Text; Double Stream Cross Modal",
+        "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",]
+    
 
     average_times = [67.1, 12.3, 67.8, 154.6, 66.4]
     # fig,axs = plt.subplots(1,2,figsize = (16,9))
@@ -709,8 +710,8 @@ if __name__ == '__main__':
     # eps_epoch()
     # eps_best()
     # feature_new()
-    plot_compare_DP_scheme()
-    # plot_compare_modal_with_time_cost()
+    # plot_compare_DP_scheme()
+    plot_compare_modal_with_time_cost()
     # plot_compare_ini()
     
         
