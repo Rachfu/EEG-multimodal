@@ -367,10 +367,10 @@ def plot_compare_DP_scheme():
     # 绘制图表
     colors = ['#B3D9FB',"#006D77","#83C5BE","#FFDDD2"]
     scatter_colors = ["#72A0C1","#004B52","#66B7AF","#FFC2AD"]
-    labels = ["Laplacian Dropout (Our Method)",
-              "Laplacian Dropout with Equal Weights (One Relaxation of Our Method with Weaker Privacy)",
+    labels = ["Laplacian Dropout; Privacy Budget = 1.0 (Our Method)",
+              "Laplacian Dropout with Equal Weights ; Privacy Budget = 1.0 (One Relaxation of Our Method \n with Weaker Privacy)",
               "NDP (Non-Private Version of Our Method)",
-              "DPSGD (Noise Perturbation on SGD)"
+              "DPSGD Privacy Budget = 1.0 (Noise Perturbation on SGD)"
               ]
     plt.figure(figsize=(12, 8))
 
@@ -709,8 +709,8 @@ if __name__ == '__main__':
     # eps_epoch()
     # eps_best()
     # feature_new()
-    # plot_compare_DP_scheme()
-    plot_compare_modal_with_time_cost()
+    plot_compare_DP_scheme()
+    # plot_compare_modal_with_time_cost()
     # plot_compare_ini()
     
         
