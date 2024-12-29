@@ -431,35 +431,39 @@ def plot_compare_modal():
             "test_accuracies": test_accuracies
         }
 
-    file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
-    epochs = []
-    test_accuracies = []
+    # file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
+    # epochs = []
+    # test_accuracies = []
     
-    # 读取文件内容
-    with open(file_path, "r") as file:
-        for line in file:
-            if "Epochs" in line:
-                epoch = int(line.split(":")[1].strip())
-                epochs.append(epoch)
-            elif "Test Accuracy" in line:
-                test_accuracy = float(line.split(":")[1].strip())
-                test_accuracies.append(test_accuracy)
+    # # 读取文件内容
+    # with open(file_path, "r") as file:
+    #     for line in file:
+    #         if "Epochs" in line:
+    #             epoch = int(line.split(":")[1].strip())
+    #             epochs.append(epoch)
+    #         elif "Test Accuracy" in line:
+    #             test_accuracy = float(line.split(":")[1].strip())
+    #             test_accuracies.append(test_accuracy)
     
     # 存储数据
-    method = "SingStream"
-    methods_data[method] = {
-        "epochs": epochs,
-        "test_accuracies": test_accuracies
-    }
+    # method = "SingStream"
+    # methods_data[method] = {
+    #     "epochs": epochs,
+    #     "test_accuracies": test_accuracies
+    # }
     # 绘制图表
-    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
-    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
+    # colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
+    # scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
+
+    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384"]
+    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3"]
     labels = [
         "EEG as Text, OM as Image; Double Stream Cross Modal(Our Method)",
         "EEG and OM as Image; Double Stream Cross Modal",
         "EEG as Image, OM as Text; Double Stream Cross Modal",
         "EEG and OM as Text; Double Stream Cross Modal",
-        "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",]
+        # "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",
+        ]
     plt.figure(figsize=(12, 8))
 
 # 绘制图表
@@ -561,38 +565,39 @@ def plot_compare_modal_with_time_cost():
             "test_accuracies": test_accuracies
         }
 
-    file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
-    epochs = []
-    test_accuracies = []
+    # file_path = "logs/compare_corss_model_type_3layers/single_stream/whole_record.txt"
+    # epochs = []
+    # test_accuracies = []
     
-    # 读取文件内容
-    with open(file_path, "r") as file:
-        for line in file:
-            if "Epochs" in line:
-                epoch = int(line.split(":")[1].strip())
-                epochs.append(epoch)
-            elif "Test Accuracy" in line:
-                test_accuracy = float(line.split(":")[1].strip())
-                test_accuracies.append(test_accuracy)
+    # # 读取文件内容
+    # with open(file_path, "r") as file:
+    #     for line in file:
+    #         if "Epochs" in line:
+    #             epoch = int(line.split(":")[1].strip())
+    #             epochs.append(epoch)
+    #         elif "Test Accuracy" in line:
+    #             test_accuracy = float(line.split(":")[1].strip())
+    #             test_accuracies.append(test_accuracy)
     
-    # 存储数据
-    method = "SingStream"
-    methods_data[method] = {
-        "epochs": epochs,
-        "test_accuracies": test_accuracies
-    }
+    # # 存储数据
+    # method = "SingStream"
+    # methods_data[method] = {
+    #     "epochs": epochs,
+    #     "test_accuracies": test_accuracies
+    # }
     # 绘制图表
-    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384","#8E9AAF"]
-    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3","#7C8AA2"]
+    colors = ['#B3D9FB',"#FBB1EC","#EFD3D7","#A69384"]
+    scatter_colors = ["#72A0C1","#F977DF","#E4B4BB","#927BA3"]
     labels =  [
-        "EEG as Text, OM as Image; Double Stream Cross Modal(Our Method)",
-        "EEG and OM as Image; Double Stream Cross Modal",
-        "EEG as Image, OM as Text; Double Stream Cross Modal",
-        "EEG and OM as Text; Double Stream Cross Modal",
-        "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",]
+        "EEG as Text, OM as Image (Our Method)",
+        "EEG and OM as Image",
+        "EEG as Image, OM as Text",
+        "EEG and OM as Text",
+        # "EEG as Text, OM as Image; Single Stream Cross Modal (One Variant of Our Method)",
+        ]
     
 
-    average_times = [67.1, 12.3, 67.8, 154.6, 66.4]
+    average_times = [67.1, 12.3, 67.8, 154.6]
     # fig,axs = plt.subplots(1,2,figsize = (16,9))
     fig = plt.figure(figsize=(21,9))
     gs = gridspec.GridSpec(1,2,width_ratios=[2,1])
@@ -633,7 +638,7 @@ def plot_compare_modal_with_time_cost():
     ax0.set_ylim(0.5, 1.05)
     ax0.set_yticks(np.arange(0.5, 1.05, 0.1))
     ax0.grid(True)
-    fig.suptitle("Test Accuracy and Time Cost Comparison with Various Modal Selection for Treating EEG, Other Modals (OM) and Cross Modal Features",
+    fig.suptitle("Test Accuracy and Time Cost Comparison with Various Modal Selection for Treating EEG and Other Modals (OM)",
                  fontsize=16)
     plt.tight_layout()
     plt.savefig('result/fig_modal_with_time_cost.pdf') 
@@ -710,8 +715,8 @@ if __name__ == '__main__':
     # eps_epoch()
     # eps_best()
     # feature_new()
-    plot_compare_DP_scheme()
-    # plot_compare_modal_with_time_cost()
+    # plot_compare_DP_scheme()
+    plot_compare_modal_with_time_cost()
     # plot_compare_ini()
     
         
